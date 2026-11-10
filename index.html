@@ -939,7 +939,9 @@ main {
 .cv-fav input:checked + i::after {
   transform: translateX(20px);
 }
+.cv-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cv-photo {
+  overflow: hidden;
   height: 190px;
   border-radius: 14px;
   background: #e4e4e4;
@@ -2739,7 +2741,9 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
           </div>
         </div>
         <div class="cv-side">
-          <div class="cv-photo">Фото міста</div>
+          <div class="cv-photo" id="cvPhoto">Фото міста</div>
+          <button class="btn" id="cvPhotoBtn" type="button" style="display:none;margin-top:8px">Змінити фото міста</button>
+          <input id="cvPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" hidden>
         </div>
       </div>
 
@@ -3742,6 +3746,17 @@ function renderCity() {
   const canManageEd = me.role === 'owner';
   $('edAdd').style.display = canManageEd ? '' : 'none';
   $('edDel').style.display = canManageEd && (cityEditors[c.id] || []).length ? '' : 'none';
+  const cph = $('cvPhoto');
+  cph.textContent = '';
+  if (c.photo_url) {
+    const im = document.createElement('img');
+    im.src = c.photo_url;
+    im.alt = '';
+    cph.appendChild(im);
+  } else {
+    cph.textContent = 'Фото міста';
+  }
+  $('cvPhotoBtn').style.display = canEditEnt() ? '' : 'none';
   renderSources(c.author_contacts);
   if (entCity !== currentId) {
     entCity = currentId;
@@ -3796,6 +3811,25 @@ $('edDel').addEventListener('click', async () => {
   const { error } = await db.from('city_editors').delete().eq('city_id', currentId).eq('user_id', ed.id);
   if (error) { alert(error.message); return; }
   await loadCityEditors(currentId);
+});
+
+$('cvPhotoBtn').addEventListener('click', () => $('cvPhotoFile').click());
+$('cvPhotoFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file || !currentId) return;
+  if (!allowedTypes.includes(file.type)) { alert('Дозволені лише JPG, PNG, WEBP'); return; }
+  if (file.size > 5 * 1024 * 1024) { alert('Файл більший за 5 МБ'); return; }
+  const path = me.uid + '/city-' + currentId + '-' + Date.now();
+  const up = await db.storage.from('photos').upload(path, file, { contentType: file.type });
+  if (up.error) { alert(up.error.message); return; }
+  const url = db.storage.from('photos').getPublicUrl(path).data.publicUrl;
+  const { data, error } = await db.from('cities').update({ photo_url: url }).eq('id', currentId).select('id');
+  if (error) { alert(error.message); return; }
+  if (!data || !data.length) { alert('Немає прав змінювати фото цього міста'); return; }
+  const c = cities.find(x => x.id === currentId);
+  if (c) c.photo_url = url;
+  renderCity();
 });
 
 function showCity(id) {
