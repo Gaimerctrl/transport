@@ -3739,7 +3739,7 @@ function renderCity() {
   $('viMod').classList.toggle('hidden', !(c.submitted && !c.is_published));
   const isOwn = !!me.uid && c.owner_id === me.uid;
   $('viActions').classList.toggle('hidden', !(isOwn || isCityEditor(c) || isStaff()));
-  const canManageEd = isOwn || isStaff();
+  const canManageEd = me.role === 'owner';
   $('edAdd').style.display = canManageEd ? '' : 'none';
   $('edDel').style.display = canManageEd && (cityEditors[c.id] || []).length ? '' : 'none';
   renderSources(c.author_contacts);
