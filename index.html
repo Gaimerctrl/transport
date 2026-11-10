@@ -5625,7 +5625,7 @@ async function setBan(a, ban, reason) {
 }
 
 async function deleteAccount(a, reason) {
-  const { data, error } = await db.functions.invoke('delete-account', { body: { target: a.id, reason } });
+  const { data, error } = await db.functions.invoke('smooth-handler', { body: { target: a.id, reason } });
   if (error) {
     let m = error.message;
     try {
