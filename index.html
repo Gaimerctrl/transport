@@ -2728,6 +2728,8 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
           <div class="cv-editors">
             <span class="cv-label">Локальні редактори:</span>
             <b id="viEditor"></b>
+            <button class="btn" id="edAdd" type="button" style="display:none;margin-left:8px">＋ Додати</button>
+            <button class="btn" id="edDel" type="button" style="display:none">− Прибрати</button>
           </div>
           <div class="cv-btns">
             <div id="viActions" class="cv-act hidden">
@@ -3637,6 +3639,7 @@ let editingId = null;
 let delTimer = null;
 let shownId = null;
 let owners = {};
+let cityEditors = {};
 
 function renderSources(text) {
   const parts = (text || '').split(/[\s,;]+/).filter(Boolean);
@@ -3732,10 +3735,13 @@ function renderCity() {
   $('viDesc').textContent = c.description || '';
   $('viDesc').classList.toggle('hidden', !c.description);
   $('viAbout').textContent = c.description || 'Опис поки відсутній';
-  $('viEditor').textContent = owners[c.owner_id] || '';
+  $('viEditor').textContent = [owners[c.owner_id]].concat((cityEditors[c.id] || []).map(e => e.name)).filter(Boolean).join(', ');
   $('viMod').classList.toggle('hidden', !(c.submitted && !c.is_published));
   const isOwn = !!me.uid && c.owner_id === me.uid;
-  $('viActions').classList.toggle('hidden', !(isOwn || isStaff()));
+  $('viActions').classList.toggle('hidden', !(isOwn || isCityEditor(c) || isStaff()));
+  const canManageEd = isOwn || isStaff();
+  $('edAdd').style.display = canManageEd ? '' : 'none';
+  $('edDel').style.display = canManageEd && (cityEditors[c.id] || []).length ? '' : 'none';
   renderSources(c.author_contacts);
   if (entCity !== currentId) {
     entCity = currentId;
@@ -3747,10 +3753,50 @@ function renderCity() {
     photos = [];
     setTimeout(loadCityRoutes, 0);
     setTimeout(loadPhotos, 0);
+    setTimeout(() => loadCityEditors(currentId), 0);
   }
   renderEnterprises();
   renderVehicles();
 }
+
+function isCityEditor(c) {
+  return !!c && !!me.uid && (cityEditors[c.id] || []).some(e => e.id === me.uid);
+}
+
+async function loadCityEditors(cid) {
+  if (!cid) return;
+  const { data: eds } = await db.from('city_editors').select('user_id').eq('city_id', cid);
+  const ids = (eds || []).map(e => e.user_id);
+  let list = [];
+  if (ids.length) {
+    const { data: ps } = await db.from('profiles').select('id, username').in('id', ids);
+    list = (ps || []).map(p => ({ id: p.id, name: p.username }));
+  }
+  cityEditors[cid] = list;
+  if (currentId === cid) renderCity();
+}
+
+$('edAdd').addEventListener('click', async () => {
+  const nick = (prompt('Нік нового редактора:') || '').trim();
+  if (!nick) return;
+  const { data: p } = await db.from('profiles').select('id, username')
+    .ilike('username', nick.replace(/[%_]/g, '\\$&')).maybeSingle();
+  if (!p) { alert('Користувача з таким ніком не знайдено'); return; }
+  const { error } = await db.from('city_editors').insert({ city_id: currentId, user_id: p.id });
+  if (error) { alert(error.message); return; }
+  await loadCityEditors(currentId);
+});
+
+$('edDel').addEventListener('click', async () => {
+  const list = cityEditors[currentId] || [];
+  const nick = (prompt('Кого прибрати? Нік редактора:\n' + list.map(e => e.name).join(', ')) || '').trim().toLowerCase();
+  if (!nick) return;
+  const ed = list.find(e => e.name.toLowerCase() === nick);
+  if (!ed) { alert('Такого редактора в місті немає'); return; }
+  const { error } = await db.from('city_editors').delete().eq('city_id', currentId).eq('user_id', ed.id);
+  if (error) { alert(error.message); return; }
+  await loadCityEditors(currentId);
+});
 
 function showCity(id) {
   curEnt = null;
@@ -4052,7 +4098,7 @@ $('entStatus').replaceChildren(...ENT_STATUSES.map(s => new Option(s.sym + ' —
 
 function canEditEnt() {
   const c = cities.find(x => x.id === currentId);
-  return !!c && !!me.uid && (c.owner_id === me.uid || isStaff());
+  return !!c && !!me.uid && (c.owner_id === me.uid || isCityEditor(c) || isStaff());
 }
 
 function setCityTab(tab) {
@@ -5579,7 +5625,9 @@ function renderRequests() {
   fillReq($('reqLocal'), cities.filter(c => c.is_published), c => [
     { cls: 'danger', text: 'Зняти з публікації', fn: () => unpublishCity(c) }
   ]);
-  fillReq($('reqDrafts'), cities.filter(c => !c.is_published && !c.submitted), () => []);
+  fillReq($('reqDrafts'), cities.filter(c => !c.is_published && !c.submitted), c =>
+    me.role === 'owner' ? [{ cls: 'green', text: 'Опублікувати', fn: () => approveCity(c) }] : []
+  );
   $('reqDraftsEmpty').classList.toggle('hidden', !!$('reqDrafts').children.length);
   $('reqPendingEmpty').classList.toggle('hidden', !!$('reqPending').children.length);
   $('reqLocalEmpty').classList.toggle('hidden', !!$('reqLocal').children.length);
