@@ -3756,7 +3756,7 @@ function renderCity() {
   } else {
     cph.textContent = 'Фото міста';
   }
-  $('cvPhotoBtn').style.display = canEditEnt() ? '' : 'none';
+  $('cvPhotoBtn').style.display = (me.role === 'owner' || isOwn || isCityEditor(c)) ? '' : 'none';
   renderSources(c.author_contacts);
   if (entCity !== currentId) {
     entCity = currentId;
