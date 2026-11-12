@@ -2760,7 +2760,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     <p id="phReqEmpty" class="cv-empty">Заявок на фото немає</p>
   </div>
   <div class="staff-pane hidden" id="staffAccounts">
-    <input class="cv-search acc-search" id="accSearch" type="text" placeholder="Пошук за ніком...">
+    <input class="cv-search acc-search" id="accSearch" type="text" placeholder="Пошук за ніком..." autocomplete="off">
     <p id="accMsg" class="msg"></p>
     <div id="accList" class="notif-list acc-list"></div>
   </div>
@@ -2807,7 +2807,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
             <div id="viActions" class="cv-act hidden">
               <button class="btn dark" id="editCity" type="button">Редагувати</button>
             </div>
-            <input class="cv-search" type="text" placeholder="Бортовий/держ. №">
+            <input class="cv-search" type="text" placeholder="Бортовий/держ. №" autocomplete="off">
           </div>
         </div>
         <div class="cv-side">
@@ -2834,7 +2834,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         <div class="cv-filters">
           <div class="dd" id="ddEnt"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
           <div class="dd" id="ddTransport"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
-          <label class="cv-route"><span>Маршрут</span><input type="text"></label>
+          <label class="cv-route"><span>Маршрут</span><input type="text" autocomplete="off"></label>
           <div class="dd" id="ddCategory"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
         </div>
         <div id="phGrid" class="ph-grid"></div>
@@ -2872,7 +2872,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     <div class="cv-filters">
       <div class="dd" id="ddGCity"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
       <div class="dd" id="ddGTransport"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
-      <label class="cv-route"><span>Маршрут</span><input id="gRoute" type="text"></label>
+      <label class="cv-route"><span>Маршрут</span><input id="gRoute" type="text" autocomplete="off"></label>
       <div class="dd" id="ddGCategory"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
     </div>
     <div id="gTop" class="hidden">
@@ -2914,7 +2914,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
   <div class="cv-tabpane">
     <h2 class="cv-about-title">Пошук транспорту</h2>
     <div class="srch-bar">
-      <input id="srQ" class="cv-search" type="text" maxlength="30" placeholder="Бортовий або державний номер">
+      <input id="srQ" class="cv-search" type="text" maxlength="30" placeholder="Бортовий або державний номер" autocomplete="off">
       <button class="btn dark" id="srGo" type="button">Шукати</button>
     </div>
     <p id="srMsg" class="msg"></p>
@@ -3025,9 +3025,9 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         <label class="up-inl"><span>Місце зйомки</span><input id="phPlace" type="text" maxlength="150" autocomplete="off" placeholder="вулиця, зупинка"></label>
         <div class="up-f"><span>Дата зйомки</span>
           <div class="up-date">
-            <input class="up-in" id="phDD" type="text" inputmode="numeric" maxlength="2" placeholder="ДД">
-            <input class="up-in" id="phMM" type="text" inputmode="numeric" maxlength="2" placeholder="ММ">
-            <input class="up-in" id="phYYYY" type="text" inputmode="numeric" maxlength="4" placeholder="РРРР">
+            <input class="up-in" id="phDD" type="text" inputmode="numeric" maxlength="2" placeholder="ДД" autocomplete="off">
+            <input class="up-in" id="phMM" type="text" inputmode="numeric" maxlength="2" placeholder="ММ" autocomplete="off">
+            <input class="up-in" id="phYYYY" type="text" inputmode="numeric" maxlength="4" placeholder="РРРР" autocomplete="off">
             <div class="up-dd" id="phKindDd"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="up-dd-menu"></div></div>
           </div>
         </div>
@@ -3047,7 +3047,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
           <div class="up-sug hidden" id="phRouteSug"></div>
         </div>
         <p class="up-note">У полі «Маршрут №» зазначайте лише номер (зокрема, 27к чи N208) і обирайте маршрут зі списку.</p>
-        <label class="up-inl"><span>Примітка до маршруту</span><input id="phRouteNote" type="text" maxlength="500"></label>
+        <label class="up-inl"><span>Примітка до маршруту</span><input id="phRouteNote" type="text" maxlength="500" autocomplete="off"></label>
         <p class="up-note">Супровідну інформацію (в депо, службовий) зазначайте в полі «Примітка».</p>
       </div>
     </div>
@@ -3055,7 +3055,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
       <div class="up-label">Додаткові параметри</div>
       <div class="up-col">
         <label class="up-f"><span>Примітка (опційно)</span><textarea class="up-in" id="phNote" rows="4" maxlength="1000" placeholder="Введіть текст"></textarea></label>
-        <label class="up-f"><span>Теги</span><input class="up-in" id="phTags" type="text" maxlength="300" placeholder="захід сонця, дощ, бруківка (через кому)"></label>
+        <label class="up-f"><span>Теги</span><input class="up-in" id="phTags" type="text" maxlength="300" placeholder="захід сонця, дощ, бруківка (через кому)" autocomplete="off"></label>
         <label class="up-check"><input type="checkbox" id="phOwn" checked=""> <b>Фотографія зроблена мною</b></label>
         <label class="up-check"><input type="checkbox" id="phWm"> <b>Додати водяний знак з моїм ніком</b></label>
       </div>
@@ -3113,7 +3113,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         <div class="ev-actions">
           <button class="btn dark hidden" id="addVeh" type="button">+ Додати ТС</button>
           <button class="btn dark hidden" id="addRoute" type="button">+ Додати маршрут</button>
-          <input class="cv-search" id="vehFilter" type="text" placeholder="Бортовий/держ. №">
+          <input class="cv-search" id="vehFilter" type="text" placeholder="Бортовий/держ. №" autocomplete="off">
         </div>
       </div>
       <div id="vehList" class="veh-wrap"></div>
@@ -3142,7 +3142,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     </div>
     <div class="side-block">
       <h3>Міста</h3>
-      <input class="cv-search tree-search" id="citySearch" type="text" placeholder="Муніципалітет, регіон, країна">
+      <input class="cv-search tree-search" id="citySearch" type="text" placeholder="Муніципалітет, регіон, країна" autocomplete="off" name="city_search" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other">
       <div id="allCities" class="tree"></div>
     </div>
   </aside>
@@ -3165,7 +3165,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     <form id="albumForm" class="view">
       <h2 id="abTitle">Альбом</h2>
       <select id="abPick"></select>
-      <input id="abName" type="text" maxlength="80" placeholder="Назва альбому">
+      <input id="abName" type="text" maxlength="80" placeholder="Назва альбому" autocomplete="off">
       <textarea id="abDesc" rows="3" maxlength="500" placeholder="Опис (необов’язково)"></textarea>
       <button class="btn dark" id="abSave" type="submit">Зберегти</button>
       <p id="abMsg" class="msg"></p>
@@ -3241,16 +3241,16 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         </div>
       </div>
       <div class="city-grid">
-        <label>Назва *<input id="cityName" type="text" maxlength="100" required=""></label>
-        <label>Країна *<input id="cityCountry" type="text" maxlength="100" required=""></label>
-        <label>Регіон<input id="cityRegion" type="text" maxlength="100"></label>
-        <label>Населення<input id="cityPopulation" type="number" min="0" step="1"></label>
-        <label>Рік заснування<input id="cityFounded" type="number" step="1"></label>
-        <label>Площа (км²)<input id="cityArea" type="number" min="0" step="any"></label>
-        <label>Широта<input id="cityLat" type="number" step="any" min="-90" max="90"></label>
-        <label>Довгота<input id="cityLng" type="number" step="any" min="-180" max="180"></label>
+        <label>Назва *<input id="cityName" type="text" maxlength="100" required="" autocomplete="off"></label>
+        <label>Країна *<input id="cityCountry" type="text" maxlength="100" required="" autocomplete="off"></label>
+        <label>Регіон<input id="cityRegion" type="text" maxlength="100" autocomplete="off"></label>
+        <label>Населення<input id="cityPopulation" type="number" min="0" step="1" autocomplete="off"></label>
+        <label>Рік заснування<input id="cityFounded" type="number" step="1" autocomplete="off"></label>
+        <label>Площа (км²)<input id="cityArea" type="number" min="0" step="any" autocomplete="off"></label>
+        <label>Широта<input id="cityLat" type="number" step="any" min="-90" max="90" autocomplete="off"></label>
+        <label>Довгота<input id="cityLng" type="number" step="any" min="-180" max="180" autocomplete="off"></label>
         <div class="full"><button class="btn light" id="cityGeo" type="button">📍 Знайти координати за назвою</button></div>
-        <label class="full">Контакти автора<input id="cityContacts" type="text" maxlength="300"></label>
+        <label class="full">Контакти автора<input id="cityContacts" type="text" maxlength="300" autocomplete="off"></label>
         <label class="full">Опис<textarea id="cityDesc" rows="5" maxlength="5000"></textarea></label>
       </div>
       <div class="city-foot">
@@ -3265,11 +3265,11 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     <form id="entForm" class="view">
       <div class="city-head"><h2 id="entTitle">Додати підприємство</h2></div>
       <div class="city-grid">
-        <label class="full">Назва *<input id="entName" type="text" maxlength="150" required=""></label>
+        <label class="full">Назва *<input id="entName" type="text" maxlength="150" required="" autocomplete="off"></label>
         <div class="veh-pick full"><span>Види транспорту</span><button class="dd-btn" id="entTypesBtn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button></div>
         <label>Статус<select id="entStatus"></select></label>
-        <label>Рік заснування<input id="entFounded" type="number" step="1"></label>
-        <label class="full">Реорганізація (група)<input id="entReorg" type="text" maxlength="100" placeholder="Напр. Hisl. Однакова назва об’єднує підприємства в групу"></label>
+        <label>Рік заснування<input id="entFounded" type="number" step="1" autocomplete="off"></label>
+        <label class="full">Реорганізація (група)<input id="entReorg" type="text" maxlength="100" placeholder="Напр. Hisl. Однакова назва об’єднує підприємства в групу" autocomplete="off"></label>
         <label class="full">Примітка<textarea id="entNote" rows="3" maxlength="1000"></textarea></label>
       </div>
       <div class="city-foot">
@@ -3283,17 +3283,17 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     <form id="vehForm" class="view">
       <div class="city-head"><h2 id="vehTitle">Додати ТС</h2></div>
       <div class="city-grid veh-grid">
-        <label>Борт. № *<input id="vehFleet" type="text" maxlength="30" required=""></label>
-        <label>Дод. №<input id="vehExtra" type="text" maxlength="30"></label>
-        <div class="veh-pick"><span>Держ. №</span><div class="plate-row"><input id="vehPlate" type="text" maxlength="30"><button class="plate-gen" id="plateGen" type="button" title="Тип номера"><i class="dd-arrow"></i></button></div></div>
+        <label>Борт. № *<input id="vehFleet" type="text" maxlength="30" required="" autocomplete="off"></label>
+        <label>Дод. №<input id="vehExtra" type="text" maxlength="30" autocomplete="off"></label>
+        <div class="veh-pick"><span>Держ. №</span><div class="plate-row"><input id="vehPlate" type="text" maxlength="30" autocomplete="off"><button class="plate-gen" id="plateGen" type="button" title="Тип номера"><i class="dd-arrow"></i></button></div></div>
         <div class="veh-pick"><span>Тип ТС</span><button class="dd-btn" id="vehTypeBtn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button></div>
-        <label>Модель *<input id="vehModel" type="text" maxlength="100" required=""></label>
-        <label>Заводський №<input id="vehFactory" type="text" maxlength="50"></label>
-        <label>Рік побудови<input id="vehYear" type="number" step="1"></label>
-        <label>VIN<input id="vehVin" type="text" maxlength="50"></label>
-        <label>Початок роботи<input id="vehStart" type="text" maxlength="20"></label>
-        <label>Надійшов (мм.рррр)<input id="vehArrived" type="text" maxlength="20"></label>
-        <label>Списаний (мм.рррр)<input id="vehWrittenOff" type="text" maxlength="20"></label>
+        <label>Модель *<input id="vehModel" type="text" maxlength="100" required="" autocomplete="off"></label>
+        <label>Заводський №<input id="vehFactory" type="text" maxlength="50" autocomplete="off"></label>
+        <label>Рік побудови<input id="vehYear" type="number" step="1" autocomplete="off"></label>
+        <label>VIN<input id="vehVin" type="text" maxlength="50" autocomplete="off"></label>
+        <label>Початок роботи<input id="vehStart" type="text" maxlength="20" autocomplete="off"></label>
+        <label>Надійшов (мм.рррр)<input id="vehArrived" type="text" maxlength="20" autocomplete="off"></label>
+        <label>Списаний (мм.рррр)<input id="vehWrittenOff" type="text" maxlength="20" autocomplete="off"></label>
         <div class="veh-pick full"><span>Статус</span><button class="dd-btn" id="vehStatusBtn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button></div>
         <label class="full">Примітка<textarea id="vehNote" rows="3" maxlength="1000"></textarea></label>
       </div>
@@ -3313,8 +3313,8 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         <button class="btn dup-mode" data-step="0" type="button">= той же</button>
         <button class="btn dup-mode active" data-step="1" type="button">+ 1</button>
       </div>
-      <label class="file">Кількість копій (1–50)<input id="dupCount" type="number" min="1" max="50" step="1" value="1"></label>
-      <label class="file">Підсумкові номери<input id="dupResult" type="text" readonly=""></label>
+      <label class="file">Кількість копій (1–50)<input id="dupCount" type="number" min="1" max="50" step="1" value="1" autocomplete="off"></label>
+      <label class="file">Підсумкові номери<input id="dupResult" type="text" readonly="" autocomplete="off"></label>
       <p id="dupMsg" class="msg"></p>
       <div class="dup-foot">
         <button class="btn light" id="dupCancel" type="button">Скасувати</button>
@@ -3325,13 +3325,13 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     <form id="routeForm" class="view">
       <div class="city-head"><h2 id="routeTitle">Додати маршрут</h2></div>
       <div class="city-grid">
-        <label>Лінія маршруту *<input id="rtLine" type="text" maxlength="20" required=""></label>
-        <label>Період експлуатації<input id="rtPeriod" type="text" maxlength="100"></label>
+        <label>Лінія маршруту *<input id="rtLine" type="text" maxlength="20" required="" autocomplete="off"></label>
+        <label>Період експлуатації<input id="rtPeriod" type="text" maxlength="100" autocomplete="off"></label>
         <div class="veh-pick"><span>Статус</span><button class="dd-btn" id="rtStatusBtn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button></div>
         <div class="veh-pick"><span>Режим роботи</span><button class="dd-btn" id="rtModeBtn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button></div>
         <div class="veh-pick full"><span>Вид транспорту</span><button class="dd-btn" id="rtTypeBtn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button></div>
-        <label class="full">Назва маршруту<input id="rtName" type="text" maxlength="200"></label>
-        <label class="full">Примітка<input id="rtNote" type="text" maxlength="500"></label>
+        <label class="full">Назва маршруту<input id="rtName" type="text" maxlength="200" autocomplete="off"></label>
+        <label class="full">Примітка<input id="rtNote" type="text" maxlength="500" autocomplete="off"></label>
       </div>
       <div class="city-foot">
         <p id="rtMsg" class="msg"></p>
@@ -9790,6 +9790,21 @@ $('maintLogin').addEventListener('click', () => { $('maint').classList.add('hidd
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+/* --- не даємо браузеру підставляти email у пошукові поля --- */
+['citySearch', 'vehFilter', 'gRoute', 'srQ', 'accSearch'].forEach(id => {
+  const inp = $(id);
+  if (!inp) return;
+  const clean = () => {
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim())) {
+      inp.value = '';
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  };
+  inp.addEventListener('focus', clean);
+  setTimeout(clean, 300);
+  setTimeout(clean, 1500);
+});
 
 $('ppBack').addEventListener('click', closePhoto);
 
