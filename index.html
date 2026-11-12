@@ -991,6 +991,20 @@ nav #navName { cursor: pointer; }
 #gTop h3 { margin: 14px 0 8px; }
 .cm-rep { background: none; border: none; color: inherit; opacity: .55; cursor: pointer; font-size: 12px; margin-left: 8px; }
 .cm-rep:hover { opacity: 1; text-decoration: underline; }
+.pb-row { display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 10px; background: rgba(128,128,128,.12); margin: 6px 0; flex-wrap: wrap; }
+.pb-row canvas { width: 96px; height: 72px; border-radius: 8px; flex: none; background: #888; }
+.pb-name { flex: 1; min-width: 110px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pb-row input { width: 118px; padding: 7px 9px; border-radius: 8px; border: 1px solid rgba(128,128,128,.4); background: transparent; color: inherit; font: inherit; box-sizing: border-box; }
+.pb-row .pb-x { background: none; border: none; color: inherit; cursor: pointer; font-size: 16px; opacity: .7; }
+.pb-err { color: #e53935; font-size: 12px; width: 100%; }
+.cm-reply { margin-left: 28px; border-left: 2px solid rgba(128,128,128,.35); padding-left: 12px; }
+.cm-replybar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(128,128,128,.15); margin-bottom: 6px; font-size: 13px; }
+.cm-act { background: none; border: none; color: inherit; opacity: .6; cursor: pointer; font-size: 12px; margin-left: 8px; }
+.cm-act:hover { opacity: 1; text-decoration: underline; }
+.cm-mention { font-weight: 600; text-decoration: none; }
+.ph-card.has-rm { position: relative; }
+.al-rm { position: absolute; top: 8px; right: 8px; z-index: 3; border: none; border-radius: 8px; padding: 4px 9px; background: rgba(0,0,0,.65); color: #fff; cursor: pointer; }
+#albumForm select, #albumForm textarea, #albumForm input { width: 100%; padding: 11px 14px; border: 1px solid #dcdcdc; border-radius: 12px; background: transparent; color: inherit; font: inherit; margin-bottom: 10px; box-sizing: border-box; }
 .cv-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cv-photo {
   overflow: hidden;
@@ -2878,6 +2892,21 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
   </div>
 </div>
 
+<div id="albumView" class="panel hidden">
+  <div class="cv-tabpane">
+    <div class="pp-top"><button class="btn light" id="alBack" type="button">← Назад</button></div>
+    <h2 id="alTitle" class="cv-about-title"></h2>
+    <p id="alMeta" class="pf-meta"></p>
+    <p id="alDesc" class="pf-bio hidden"></p>
+    <div id="alActions" class="pf-actions hidden">
+      <button class="btn" id="alEdit" type="button">✎ Змінити</button>
+      <button class="btn danger" id="alDelete" type="button">🗑 Видалити альбом</button>
+    </div>
+    <div id="alGrid" class="ph-grid"></div>
+    <p id="alEmpty" class="cv-empty hidden">В альбомі поки немає фото</p>
+  </div>
+</div>
+
 <div id="searchView" class="panel hidden">
   <div class="cv-tabpane">
     <h2 class="cv-about-title">Пошук транспорту</h2>
@@ -2893,7 +2922,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
 <div id="vehicleView" class="panel hidden">
   <div class="cv-tabpane">
     <div class="pp-top"><button class="btn light" id="vhBack" type="button">← Назад</button></div>
-    <h2 id="vhTitle" class="cv-about-title"></h2>
+    <h2 id="vpTitle" class="cv-about-title"></h2>
     <div id="vhFacts" class="vh-grid"></div>
     <h3 class="cv-about-title">Фото</h3>
     <div id="vhGrid" class="ph-grid"></div>
@@ -2928,6 +2957,14 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     <div id="pfStats" class="pf-stats"></div>
     <h3 class="cv-about-title">Досягнення</h3>
     <div id="pfAch" class="pf-ach"></div>
+    <div id="pfAlbumsBox" class="hidden">
+      <div class="pf-photos-head">
+        <h3 class="cv-about-title">Альбоми</h3>
+        <button class="btn hidden" id="pfAlbumNew" type="button">＋ Новий альбом</button>
+      </div>
+      <div id="pfAlbums" class="pf-cities"></div>
+      <p id="pfAlbumsEmpty" class="cv-empty hidden">Альбомів поки немає</p>
+    </div>
     <h3 class="cv-about-title">Міста</h3>
     <div id="pfCities" class="pf-cities"></div>
     <p id="pfCitiesEmpty" class="cv-empty hidden">Міст поки немає</p>
@@ -2960,8 +2997,16 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
           <b>📷 Оберіть фотографію</b>
           <p>Вимоги до фото:<br>• Формат JPEG, PNG або WEBP;<br>• Файл до 25 МБ, стискається автоматично;<br>• Кадр 4:3 — перетягніть фото, щоб обрати кадр</p>
           <button class="btn dark" id="phPick" type="button">Вибрати файл</button>
+          <button class="btn light" id="phPickMany" type="button">📚 Завантажити кілька фото</button>
         </div>
         <input id="phFile" type="file" accept="image/jpeg,image/png,image/webp" hidden="">
+        <input id="phFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden="">
+        <div class="hidden" id="phBatch">
+          <div class="up-label" id="phBatchTitle"></div>
+          <p class="up-note">Кадр обрізається по центру до 4:3. Місто, місце, категорія, маршрут, примітка й теги беруться з форми, а номер борту й дату можна вказати для кожного фото.</p>
+          <div id="phBatchList"></div>
+          <button class="btn light" id="phBatchClear" type="button">Скасувати пакет</button>
+        </div>
         <div class="up-prev hidden" id="phPrevBox">
           <canvas id="phCanvas" class="ph-prev" width="960" height="720"></canvas>
           <div class="up-file">
@@ -3008,6 +3053,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         <label class="up-f"><span>Примітка (опційно)</span><textarea class="up-in" id="phNote" rows="4" maxlength="1000" placeholder="Введіть текст"></textarea></label>
         <label class="up-f"><span>Теги</span><input class="up-in" id="phTags" type="text" maxlength="300" placeholder="захід сонця, дощ, бруківка (через кому)"></label>
         <label class="up-check"><input type="checkbox" id="phOwn" checked=""> <b>Фотографія зроблена мною</b></label>
+        <label class="up-check"><input type="checkbox" id="phWm"> <b>Додати водяний знак з моїм ніком</b></label>
       </div>
     </div>
     <div class="up-foot">
@@ -3031,6 +3077,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         <div class="pp-cm-line"></div>
         <div id="cmForm">
           <h4 class="pp-cm-title">Ваш коментар</h4>
+          <div id="cmReplyBar" class="cm-replybar hidden"><span id="cmReplyTxt"></span><button class="cm-del" id="cmReplyX" type="button">✕</button></div>
           <textarea class="up-in" id="cmText" rows="5" maxlength="1000" placeholder="Введіть текст"></textarea>
           <p id="cmMsg" class="msg"></p>
           <button class="btn dark" id="cmSend" type="button">Надіслати</button>
@@ -3111,6 +3158,16 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
       <p class="switch">Немає акаунта? <button class="link" id="toRegister" type="button">Реєстрація</button></p>
     </form>
 
+    <form id="albumForm" class="view">
+      <h2 id="abTitle">Альбом</h2>
+      <select id="abPick"></select>
+      <input id="abName" type="text" maxlength="80" placeholder="Назва альбому">
+      <textarea id="abDesc" rows="3" maxlength="500" placeholder="Опис (необов’язково)"></textarea>
+      <button class="btn dark" id="abSave" type="submit">Зберегти</button>
+      <p id="abMsg" class="msg"></p>
+      <p class="switch"><button class="link" id="abCancel" type="button">Скасувати</button></p>
+    </form>
+
     <form id="reportForm" class="view">
       <h2>Поскаржитись</h2>
       <p id="repTarget" class="msg"></p>
@@ -3151,6 +3208,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
       <label class="file">Аватар (необов'язково, до 2 МБ)
         <input id="regAvatar" type="file" accept="image/jpeg,image/png,image/webp">
       </label>
+      <input id="regWebsite" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0">
       <button class="btn dark" id="regSubmit" type="submit">Створити акаунт</button>
       <p id="regMsg" class="msg"></p>
       <p class="switch">Вже є акаунт? <button class="link" id="toLogin" type="button">Увійти</button></p>
@@ -3503,7 +3561,7 @@ const $ = id => document.getElementById(id);
 const placeholder = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44"><rect width="44" height="44" fill="#d9d9d9"/><circle cx="22" cy="17" r="8" fill="#9a9a9a"/><path d="M6 44c0-10 7-16 16-16s16 6 16 16z" fill="#9a9a9a"/></svg>');
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 const maxSize = 2 * 1024 * 1024;
-const views = { login: $('loginForm'), register: $('registerForm'), pending: $('pendingView'), city: $('cityForm'), pick: $('pickView'), reason: $('reasonView'), notif: $('notifView'), ent: $('entForm'), veh: $('vehForm'), route: $('routeForm'), routeInfo: $('routeInfo'), settings: $('settingsView'), report: $('reportForm'), forgot: $('forgotForm'), reset: $('resetForm'), dup: $('dupForm'), ban: $('banView'), vehInfo: $('vehInfo'), import: $('importView'), photoUp: $('photoUp'), photoView: $('photoView'), confirmed: $('confirmedView') };
+const views = { login: $('loginForm'), register: $('registerForm'), pending: $('pendingView'), city: $('cityForm'), pick: $('pickView'), reason: $('reasonView'), notif: $('notifView'), ent: $('entForm'), veh: $('vehForm'), route: $('routeForm'), routeInfo: $('routeInfo'), settings: $('settingsView'), report: $('reportForm'), album: $('albumForm'), forgot: $('forgotForm'), reset: $('resetForm'), dup: $('dupForm'), ban: $('banView'), vehInfo: $('vehInfo'), import: $('importView'), photoUp: $('photoUp'), photoView: $('photoView'), confirmed: $('confirmedView') };
 
 let me = { uid: null, role: null };
 const LANGS = ['uk', 'ru', 'en'];
@@ -3536,6 +3594,7 @@ function openModal(mode) {
   setMsg($('regMsg'), '');
   setMsg($('pendMsg'), '');
   setMsg($('cityMsg'), '');
+  if (mode === 'register') regShownAt = Date.now();
   showView(mode);
   $('overlay').classList.add('open');
 }
@@ -3793,6 +3852,8 @@ $('loginForm').addEventListener('submit', async e => {
 $('registerForm').addEventListener('submit', async e => {
   e.preventDefault();
   setMsg($('regMsg'), '');
+  if ($('regWebsite').value) { setMsg($('regMsg'), 'Помилка. Спробуйте ще раз.'); return; }
+  if (Date.now() - regShownAt < 1500) { setMsg($('regMsg'), 'Зачекайте секунду і натисніть ще раз'); return; }
   const username = $('regUsername').value.trim();
   const email = $('regEmail').value.trim();
   const password = $('regPassword').value;
@@ -3880,6 +3941,11 @@ let shownId = null;
 let owners = {};
 let cityEditors = {};
 const myFollows = new Set();
+let regShownAt = 0;
+let phBatch = [];
+let cmReply = null;
+let albumCur = null;
+let albumDlg = null;
 
 function renderSources(text) {
   const parts = (text || '').split(/[\s,;]+/).filter(Boolean);
@@ -5407,6 +5473,25 @@ function applyAccountPrefs(p) {
 
 const DICT = Object.create(null);
 [
+  ['📚 Завантажити кілька фото', '📚 Загрузить несколько фото', '📚 Upload several photos'],
+  ['Кадр обрізається по центру до 4:3. Місто, місце, категорія, маршрут, примітка й теги беруться з форми, а номер борту й дату можна вказати для кожного фото.', 'Кадр обрезается по центру до 4:3. Город, место, категория, маршрут, примечание и теги берутся из формы, а бортовой номер и дату можно указать для каждого фото.', 'The frame is cropped to 4:3 around the center. City, place, category, route, note and tags come from the form; the fleet number and date can be set for each photo.'],
+  ['Скасувати пакет', 'Отменить пакет', 'Cancel batch'],
+  ['Додати водяний знак з моїм ніком', 'Добавить водяной знак с моим ником', 'Add a watermark with my nickname'],
+  ['Дату зйомки взято з даних фото', 'Дата съёмки взята из данных фото', 'Shooting date taken from photo data'],
+  ['Відповісти', 'Ответить', 'Reply'],
+  ['Відповідь для', 'Ответ для', 'Reply to'],
+  ['Альбоми', 'Альбомы', 'Albums'],
+  ['＋ Новий альбом', '＋ Новый альбом', '＋ New album'],
+  ['Альбомів поки немає', 'Альбомов пока нет', 'No albums yet'],
+  ['📁 В альбом', '📁 В альбом', '📁 Add to album'],
+  ['Альбом', 'Альбом', 'Album'],
+  ['Новий альбом', 'Новый альбом', 'New album'],
+  ['Назва альбому', 'Название альбома', 'Album name'],
+  ['В альбомі поки немає фото', 'В альбоме пока нет фото', 'No photos in this album yet'],
+  ['✎ Змінити', '✎ Изменить', '✎ Edit'],
+  ['🗑 Видалити альбом', '🗑 Удалить альбом', '🗑 Delete album'],
+  ['Зберегти', 'Сохранить', 'Save'],
+  ['➕ Новий альбом…', '➕ Новый альбом…', '➕ New album…'],
   ['Поскаржитись', 'Пожаловаться', 'Report'],
   ['Надіслати скаргу', 'Отправить жалобу', 'Send report'],
   ['Спам', 'Спам', 'Spam'],
@@ -6818,6 +6903,7 @@ DICT['Опис фотографій'] = { ru: 'Описание фотограф
 DICT['Видалити акаунт'] = { ru: 'Удалить аккаунт', en: 'Delete account' };
 
 const phUrl = p => db.storage.from('photos').getPublicUrl(p.path).data.publicUrl;
+const phThumb = p => (p.thumb_path ? db.storage.from('photos').getPublicUrl(p.thumb_path).data.publicUrl : phUrl(p));
 
 /* --- галерея --- */
 function phCard(p) {
@@ -6827,7 +6913,7 @@ function phCard(p) {
   pic.className = 'ph-pic';
   const img = document.createElement('img');
   img.loading = 'lazy';
-  img.src = phUrl(p);
+  img.src = phThumb(p);
   img.alt = p.caption || '';
   pic.appendChild(img);
   if (p.status !== 'approved') {
@@ -7001,7 +7087,7 @@ $('pvDelete').addEventListener('click', async () => {
     alert(error.message);
     return;
   }
-  await db.storage.from('photos').remove([p.path]);
+  await db.storage.from('photos').remove([p.path, p.thumb_path].filter(Boolean));
   closeModal();
   await loadPhotos();
 });
@@ -7110,6 +7196,7 @@ $('phFile').addEventListener('change', async e => {
   }
   phDraw();
   phSyncFile(f);
+  phExifFill(f);
 });
 
 function phSyncFile(f) {
@@ -7136,7 +7223,7 @@ let phSugTimer = null;
 let phEditId = null;
 let myPhotos = [];
 const UP_FIELDS = ['phFleet', 'phRoute', 'phRouteNote', 'phNote', 'phTags', 'phDD', 'phMM', 'phYYYY', 'phPlace'];
-const PAGES = ['requestsView', 'galleryView', 'myView', 'uploadView', 'photoPage', 'profileView', 'searchView', 'vehicleView', 'mapView'];
+const PAGES = ['requestsView', 'galleryView', 'myView', 'uploadView', 'photoPage', 'profileView', 'searchView', 'vehicleView', 'mapView', 'albumView'];
 const DATE_KINDS = [['exact', 'Точна дата'], ['approx', 'Приблизна дата'], ['before', 'Не пізніше'], ['after', 'Не раніше'], ['unknown', 'Невідома дата']];
 
 function phSetBtn(id, text) {
@@ -7423,6 +7510,7 @@ function route(fromPop) {
   else if (h.startsWith('#search')) openSearch(decodeURIComponent(h.slice(8) || ''));
   else if (h.startsWith('#vehicle=')) openVehicle(h.slice(9));
   else if (h === '#map') openMap();
+  else if (h.startsWith('#album=')) openAlbum(h.slice(7));
   else if (fromPop) PAGES.forEach(id => $(id).classList.add('hidden'));
 }
 window.addEventListener('popstate', () => route(true));
@@ -7441,6 +7529,7 @@ function upReset() {
   phFy = 0.5;
   phDraw();
   phSyncFile(null);
+  phBatchClear();
 }
 
 async function openPhotoForm(p) {
@@ -7672,6 +7761,294 @@ $('phRemove').addEventListener('click', () => {
 $('phClear').addEventListener('click', () => { upReset(); setMsg($('phMsg'), ''); });
 $('phCancel').addEventListener('click', () => { if (phEditId) openMyPhotos(); else hidePages(); });
 
+/* --- EXIF: дата зйомки з фото --- */
+async function readExifDate(file) {
+  try {
+    if (file.type !== 'image/jpeg') return null;
+    const v = new DataView(await file.slice(0, 262144).arrayBuffer());
+    if (v.getUint16(0) !== 0xFFD8) return null;
+    let off = 2;
+    while (off + 4 < v.byteLength) {
+      const marker = v.getUint16(off);
+      const len = v.getUint16(off + 2);
+      if (marker === 0xFFE1 && v.getUint32(off + 4) === 0x45786966) {
+        const t = off + 10;
+        const le = v.getUint16(t) === 0x4949;
+        const u16 = o => v.getUint16(t + o, le);
+        const u32 = o => v.getUint32(t + o, le);
+        const entry = (ifd, tag) => {
+          const n = u16(ifd);
+          for (let i = 0; i < n; i++) {
+            const e = ifd + 2 + i * 12;
+            if (u16(e) === tag) return { count: u32(e + 4), val: u32(e + 8) };
+          }
+          return null;
+        };
+        const str = (o, n) => { let r = ''; for (let i = 0; i < n - 1; i++) r += String.fromCharCode(v.getUint8(t + o + i)); return r; };
+        const ifd0 = u32(4);
+        const ex = entry(ifd0, 0x8769);
+        let e = ex ? (entry(ex.val, 0x9003) || entry(ex.val, 0x9004)) : null;
+        if (!e) e = entry(ifd0, 0x0132);
+        if (!e || e.count < 19) return null;
+        const m = /^(\d{4}):(\d{2}):(\d{2})/.exec(str(e.val, e.count));
+        if (!m || +m[1] < 1990 || +m[2] < 1 || +m[2] > 12 || +m[3] < 1 || +m[3] > 31) return null;
+        return m[3] + '.' + m[2] + '.' + m[1];
+      }
+      if ((marker & 0xFF00) !== 0xFF00 || len < 2) break;
+      off += 2 + len;
+    }
+  } catch (e) { /* без EXIF */ }
+  return null;
+}
+
+async function phExifFill(f) {
+  if ($('phDD').value || $('phMM').value || $('phYYYY').value) return;
+  const d = await readExifDate(f);
+  if (!d) return;
+  const [dd, mm, yy] = d.split('.');
+  $('phDD').value = dd; $('phMM').value = mm; $('phYYYY').value = yy;
+  setKind('exact');
+  setMsg($('phMsg'), 'Дату зйомки взято з даних фото', true);
+}
+
+/* --- стиснення, мініатюра, водяний знак --- */
+function cropFor(img, fx = 0.5, fy = 0.5) {
+  const w = img.naturalWidth || img.width;
+  const h = img.naturalHeight || img.height;
+  let sw = w;
+  let sh = w * 3 / 4;
+  if (sh > h) { sh = h; sw = h * 4 / 3; }
+  return [Math.round((w - sw) * fx), Math.round((h - sh) * fy), Math.floor(sw), Math.floor(sh)];
+}
+
+function phWatermark(cv, text) {
+  const ctx = cv.getContext('2d');
+  const fs = Math.max(14, Math.round(cv.width * 0.028));
+  ctx.font = '600 ' + fs + 'px Arial, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+  const x = cv.width - fs * 0.8;
+  const y = cv.height - fs * 0.6;
+  ctx.lineWidth = Math.max(2, fs / 8);
+  ctx.strokeStyle = 'rgba(0,0,0,.55)';
+  ctx.fillStyle = 'rgba(255,255,255,.88)';
+  ctx.strokeText(text, x, y);
+  ctx.fillText(text, x, y);
+}
+
+async function phBuild(img, crop, wmText) {
+  const [sx, sy, sw, sh] = crop;
+  const ow = Math.min(PH_W, Math.round(sw));
+  const oh = Math.round(ow * 3 / 4);
+  let cv = document.createElement('canvas');
+  let cw = Math.round(sw);
+  let ch = Math.round(sh);
+  cv.width = cw;
+  cv.height = ch;
+  const cx = cv.getContext('2d');
+  cx.fillStyle = '#ffffff';
+  cx.fillRect(0, 0, cw, ch);
+  cx.imageSmoothingEnabled = false;
+  cx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
+  while (cw / 2 >= ow) {
+    const nw = Math.round(cw / 2);
+    const nh = Math.round(ch / 2);
+    const c2 = document.createElement('canvas');
+    c2.width = nw;
+    c2.height = nh;
+    const x2 = c2.getContext('2d');
+    x2.imageSmoothingQuality = 'high';
+    x2.drawImage(cv, 0, 0, cw, ch, 0, 0, nw, nh);
+    cv = c2;
+    cw = nw;
+    ch = nh;
+  }
+  if (cw !== ow || ch !== oh) {
+    const c3 = document.createElement('canvas');
+    c3.width = ow;
+    c3.height = oh;
+    const x3 = c3.getContext('2d');
+    x3.imageSmoothingQuality = 'high';
+    x3.drawImage(cv, 0, 0, cw, ch, 0, 0, ow, oh);
+    cv = c3;
+  }
+  if (wmText) phWatermark(cv, wmText);
+  const lossless = cv.width <= 1280;
+  const mime = lossless ? 'image/png' : 'image/jpeg';
+  const blob = await new Promise(r => cv.toBlob(r, mime, PH_Q));
+  if (!blob) throw new Error('Не вдалося стиснути фото');
+  const tc = document.createElement('canvas');
+  tc.width = 480;
+  tc.height = 360;
+  const tx = tc.getContext('2d');
+  tx.imageSmoothingQuality = 'high';
+  tx.drawImage(cv, 0, 0, cv.width, cv.height, 0, 0, 480, 360);
+  const thumb = await new Promise(r => tc.toBlob(r, 'image/jpeg', 0.8));
+  return { blob, mime, ext: lossless ? '.png' : '.jpg', thumb };
+}
+
+async function phSavePhoto(built, row) {
+  const stamp = Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  const path = row.owner_id + '/' + stamp + built.ext;
+  const up = await db.storage.from('photos').upload(path, built.blob, { contentType: built.mime, cacheControl: '31536000' });
+  if (up.error) throw up.error;
+  let thumbPath = null;
+  if (built.thumb) {
+    thumbPath = row.owner_id + '/' + stamp + '_t.jpg';
+    const tu = await db.storage.from('photos').upload(thumbPath, built.thumb, { contentType: 'image/jpeg', cacheControl: '31536000' });
+    if (tu.error) thumbPath = null;
+  }
+  let ins = await db.from('photos').insert({ ...row, path, ...(thumbPath ? { thumb_path: thumbPath } : {}) });
+  if (ins.error && thumbPath && /thumb_path/i.test(ins.error.message)) {
+    await db.storage.from('photos').remove([thumbPath]);
+    thumbPath = null;
+    ins = await db.from('photos').insert({ ...row, path });
+  }
+  if (ins.error) {
+    await db.storage.from('photos').remove([path, thumbPath].filter(Boolean));
+    throw ins.error;
+  }
+}
+
+/* --- пакетне завантаження --- */
+const PH_BATCH_MAX = 12;
+
+function phBatchClear() {
+  phBatch = [];
+  phBatchRender();
+}
+
+function phBatchRender() {
+  const on = phBatch.length > 0;
+  $('phBatch').classList.toggle('hidden', !on);
+  if (on) {
+    $('phDrop').classList.add('hidden');
+    $('phPrevBox').classList.add('hidden');
+  } else if (!phImg) {
+    $('phDrop').classList.remove('hidden');
+  }
+  $('phBatchTitle').textContent = 'Пакет: ' + phBatch.length + ' фото';
+  $('phBatchList').replaceChildren(...phBatch.map((it, i) => {
+    const row = document.createElement('div');
+    row.className = 'pb-row';
+    row.appendChild(it.canvas);
+    const nm = document.createElement('div');
+    nm.className = 'pb-name';
+    nm.textContent = it.file.name;
+    const fl = document.createElement('input');
+    fl.placeholder = 'Борт. №';
+    fl.maxLength = 30;
+    fl.value = it.fleet;
+    fl.addEventListener('input', () => { it.fleet = fl.value; });
+    const dt = document.createElement('input');
+    dt.placeholder = 'ДД.ММ.РРРР';
+    dt.maxLength = 10;
+    dt.value = it.date;
+    dt.addEventListener('input', () => { it.date = dt.value; });
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.className = 'pb-x';
+    x.textContent = '✕';
+    x.title = 'Прибрати';
+    x.addEventListener('click', () => { phBatch.splice(i, 1); phBatchRender(); });
+    row.append(nm, fl, dt, x);
+    if (it.err) {
+      const er = document.createElement('div');
+      er.className = 'pb-err';
+      er.textContent = it.err;
+      row.appendChild(er);
+    }
+    return row;
+  }));
+}
+
+async function phBatchAdd(files) {
+  const list = [...files];
+  if (list.length > PH_BATCH_MAX) setMsg($('phMsg'), 'Максимум ' + PH_BATCH_MAX + ' фото за раз, решту відкинуто');
+  else setMsg($('phMsg'), '');
+  const out = [];
+  for (const f of list.slice(0, PH_BATCH_MAX)) {
+    if (!allowedTypes.includes(f.type) || f.size > 25 * 1024 * 1024) continue;
+    let img;
+    try { img = await phLoad(f); } catch (e) { continue; }
+    const cv = document.createElement('canvas');
+    cv.width = 192;
+    cv.height = 144;
+    const [sx, sy, sw, sh] = cropFor(img);
+    cv.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, 192, 144);
+    if (img.close) img.close();
+    out.push({ file: f, canvas: cv, fleet: '', date: (await readExifDate(f)) || '', err: '' });
+  }
+  if (out.length < 2) {
+    if (out.length === 1) setMsg($('phMsg'), 'Для одного фото скористайтесь «Вибрати файл»');
+    return;
+  }
+  phImg = null;
+  phSyncFile(null);
+  phBatch = out;
+  phBatchRender();
+}
+
+$('phPickMany').addEventListener('click', () => $('phFiles').click());
+$('phFiles').addEventListener('change', async e => {
+  const files = [...e.target.files];
+  e.target.value = '';
+  if (files.length) await phBatchAdd(files);
+});
+$('phBatchClear').addEventListener('click', phBatchClear);
+
+async function phUploadBatch(fields, uid, city) {
+  const total = phBatch.length;
+  const wm = $('phWm').checked ? '© ' + (me.name || '') : '';
+  const status = isStaff() ? 'approved' : 'pending';
+  const done = [];
+  for (let i = 0; i < total; i++) {
+    const it = phBatch[i];
+    setMsg($('phMsg'), 'Завантажую ' + (i + 1) + ' з ' + total + '…', true);
+    it.err = '';
+    try {
+      const row = { ...fields, owner_id: uid, owner_name: me.name || '', status };
+      const fleet = it.fleet.trim();
+      if (fleet) {
+        row.fleet_no = fleet;
+        const { data: vm } = await db.from('vehicles')
+          .select('enterprise_id, plate_no, model, vehicle_type')
+          .eq('city_id', city.id).eq('fleet_no', fleet).limit(1);
+        const v = vm && vm[0];
+        const ent = v && v.enterprise_id ? phEnts.find(x => x.id === v.enterprise_id) : null;
+        row.model = v && v.model ? v.model : null;
+        row.plate_no = v && v.plate_no ? v.plate_no : null;
+        row.enterprise_id = ent ? ent.id : null;
+        row.enterprise_name = ent ? ent.name : null;
+        if (v && v.vehicle_type) row.transport = v.vehicle_type;
+      }
+      const dm = /^\s*(\d{1,2})\.(\d{1,2})\.(\d{4})\s*$/.exec(it.date);
+      if (dm) {
+        row.shot_date = dm[1] + '.' + dm[2] + '.' + dm[3];
+        row.date_kind = 'exact';
+      } else if (it.date.trim()) {
+        throw new Error('Дата має вигляд ДД.ММ.РРРР');
+      }
+      const img = await phLoad(it.file);
+      const built = await phBuild(img, cropFor(img), wm);
+      if (img.close) img.close();
+      await phSavePhoto(built, row);
+      done.push(it);
+    } catch (e) {
+      it.err = e.message || String(e);
+    }
+  }
+  phBatch = phBatch.filter(it => !done.includes(it));
+  if (!phBatch.length) {
+    upReset();
+    setMsg($('phMsg'), (status === 'approved' ? 'Опубліковано фото: ' : 'Надіслано на модерацію фото: ') + done.length, true);
+  } else {
+    phBatchRender();
+    setMsg($('phMsg'), 'Завантажено ' + done.length + ' з ' + total + '. Решту (з помилками) можна спробувати ще раз.');
+  }
+  if (done.length && city.id === currentId) await loadPhotos();
+}
+
 $('photoUp').addEventListener('submit', async ev => {
   ev.preventDefault();
   setMsg($('phMsg'), '');
@@ -7681,7 +8058,7 @@ $('photoUp').addEventListener('submit', async ev => {
     return;
   }
   const editing = !!phEditId;
-  if (!editing && !phImg) {
+  if (!editing && !phImg && !phBatch.length) {
     setMsg($('phMsg'), 'Обери фото');
     return;
   }
@@ -7733,57 +8110,15 @@ $('photoUp').addEventListener('submit', async ev => {
       const { error } = await db.from('photos').update(fields).eq('id', phEditId);
       if (error) throw error;
       await openMyPhotos();
+    } else if (phBatch.length) {
+      await phUploadBatch(fields, s.session.user.id, city);
     } else {
       setMsg($('phMsg'), 'Стискаю і завантажую...', true);
-      const [sx, sy, sw, sh] = phCrop();
-      const ow = Math.min(PH_W, Math.round(sw));
-      const oh = Math.round(ow * 3 / 4);
-      let cv = document.createElement('canvas');
-      let cw = Math.round(sw);
-      let ch = Math.round(sh);
-      cv.width = cw;
-      cv.height = ch;
-      const cx = cv.getContext('2d');
-      cx.fillStyle = '#ffffff';
-      cx.fillRect(0, 0, cw, ch);
-      cx.imageSmoothingEnabled = false;
-      cx.drawImage(phImg, sx, sy, sw, sh, 0, 0, cw, ch);
-      while (cw / 2 >= ow) {
-        const nw = Math.round(cw / 2);
-        const nh = Math.round(ch / 2);
-        const c2 = document.createElement('canvas');
-        c2.width = nw;
-        c2.height = nh;
-        const x2 = c2.getContext('2d');
-        x2.imageSmoothingQuality = 'high';
-        x2.drawImage(cv, 0, 0, cw, ch, 0, 0, nw, nh);
-        cv = c2;
-        cw = nw;
-        ch = nh;
-      }
-      if (cw !== ow || ch !== oh) {
-        const c3 = document.createElement('canvas');
-        c3.width = ow;
-        c3.height = oh;
-        const x3 = c3.getContext('2d');
-        x3.imageSmoothingQuality = 'high';
-        x3.drawImage(cv, 0, 0, cw, ch, 0, 0, ow, oh);
-        cv = c3;
-      }
-      const lossless = cv.width <= 1280;
-      const mime = lossless ? 'image/png' : 'image/jpeg';
-      const blob = await new Promise(r => cv.toBlob(r, mime, PH_Q));
-      if (!blob) throw new Error('Не вдалося стиснути фото');
+      const built = await phBuild(phImg, phCrop(), $('phWm').checked ? '© ' + (me.name || '') : '');
+      const blob = built.blob;
       const uid = s.session.user.id;
-      const path = uid + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + (lossless ? '.png' : '.jpg');
-      const up = await db.storage.from('photos').upload(path, blob, { contentType: mime, cacheControl: '31536000' });
-      if (up.error) throw up.error;
       const status = isStaff() ? 'approved' : 'pending';
-      const ins = await db.from('photos').insert({ ...fields, owner_id: uid, owner_name: me.name || '', path, status });
-      if (ins.error) {
-        await db.storage.from('photos').remove([path]);
-        throw ins.error;
-      }
+      await phSavePhoto(built, { ...fields, owner_id: uid, owner_name: me.name || '', status });
       upReset();
       setMsg($('phMsg'), (status === 'approved' ? 'Фото опубліковано' : 'Фото надіслано на модерацію') + ' (' + Math.round(blob.size / 1024) + ' КБ)', true);
       if (city.id === currentId) await loadPhotos();
@@ -7811,7 +8146,7 @@ function rejectPhoto(p) {
   askReason('Причина відмови', async reason => {
     const { error } = await db.from('photos').delete().eq('id', p.id);
     if (error) return error.message;
-    await db.storage.from('photos').remove([p.path]);
+    await db.storage.from('photos').remove([p.path, p.thumb_path].filter(Boolean));
     await logAction('photo_reject', p.city_name, reason);
     await notify(p.owner_id, 'Ваше фото (' + (p.enterprise_name || '') + ') у місті «' + (p.city_name || '') + '» відхилено. Причина: ' + reason);
     await loadPhotoReqs();
@@ -7995,6 +8330,7 @@ function openPhoto(p) {
     ppPrev = { cityId: currentId, ent: curEnt, pages: ['requestsView', 'galleryView', 'myView'].filter(id => !$(id).classList.contains('hidden')) };
   }
   ppCur = p;
+  cmClearReply();
   $('photoPage').style.removeProperty('--vc');
   currentId = null;
   curEnt = null;
@@ -8122,6 +8458,7 @@ function openPhoto(p) {
     setTimeout(() => { s.textContent = 'Поділитись фотографією'; }, 2000);
   }));
   side.push(favAct(p));
+  if (me.uid && p.owner_id === me.uid) side.push(albumAct(p));
   if (p.owner_id !== me.uid) side.push(ppAct('⚑', 'Поскаржитись', () => openReport('photo', p.id, (p.city_name || '') + (p.enterprise_name ? ' · ' + p.enterprise_name : ''))));
   if (me.uid && (p.owner_id === me.uid || isPhotoMod())) {
     side.push(ppAct('✎', 'Редагувати', () => openPhotoForm(p)));
@@ -8137,7 +8474,7 @@ function openPhoto(p) {
         alert(error.message);
         return;
       }
-      await db.storage.from('photos').remove([p.path]);
+      await db.storage.from('photos').remove([p.path, p.thumb_path].filter(Boolean));
       closePhoto();
       await loadPhotos();
     }, 'danger'));
@@ -8185,48 +8522,100 @@ async function openPhotoById(id) {
 }
 
 /* --- коментарі --- */
+function renderMentions(text) {
+  const frag = document.createDocumentFragment();
+  String(text || '').split(/(@[A-Za-z0-9_]{3,20})/g).forEach(part => {
+    if (/^@[A-Za-z0-9_]{3,20}$/.test(part)) {
+      const a = document.createElement('a');
+      a.href = '#';
+      a.className = 'cm-mention';
+      a.textContent = part;
+      a.addEventListener('click', async e => {
+        e.preventDefault();
+        const { data } = await db.from('profiles').select('id').ilike('username', part.slice(1).replace(/_/g, '\\_')).maybeSingle();
+        if (data) openProfile(data.id); else alert('Користувача не знайдено');
+      });
+      frag.appendChild(a);
+    } else if (part) {
+      frag.appendChild(document.createTextNode(part));
+    }
+  });
+  return frag;
+}
+
+function cmSetReply(c) {
+  if (!me.uid) { openModal('login'); return; }
+  cmReply = { id: c.parent_id || c.id, name: c.owner_name || '' };
+  $('cmReplyBar').classList.remove('hidden');
+  $('cmReplyTxt').textContent = 'Відповідь для @' + cmReply.name;
+  $('cmText').value = '@' + cmReply.name + ' ';
+  $('cmText').focus();
+}
+function cmClearReply() {
+  cmReply = null;
+  $('cmReplyBar').classList.add('hidden');
+}
+$('cmReplyX').addEventListener('click', () => { cmClearReply(); $('cmText').value = ''; });
+
+function cmNode(p, c, isReply) {
+  const d = document.createElement('div');
+  d.className = 'cm-item' + (isReply ? ' cm-reply' : '');
+  const top = document.createElement('div');
+  top.className = 'cm-top';
+  const nm = document.createElement('b');
+  nm.textContent = c.owner_name || '—';
+  linkUser(nm, c.owner_id);
+  const dt = document.createElement('small');
+  dt.textContent = new Date(c.created_at).toLocaleString('uk-UA');
+  top.append(nm, dt);
+  if (me.uid) {
+    const rb = document.createElement('button');
+    rb.type = 'button';
+    rb.className = 'cm-act';
+    rb.textContent = 'Відповісти';
+    rb.addEventListener('click', () => cmSetReply(c));
+    top.appendChild(rb);
+  }
+  if (me.uid && c.owner_id !== me.uid) {
+    const rp = document.createElement('button');
+    rp.type = 'button';
+    rp.className = 'cm-rep';
+    rp.textContent = 'Поскаржитись';
+    rp.addEventListener('click', () => openReport('comment', c.id, (c.owner_name || '') + ': ' + String(c.body).slice(0, 80)));
+    top.appendChild(rp);
+  }
+  if (me.uid && (c.owner_id === me.uid || isPhotoMod())) {
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'cm-del';
+    del.textContent = 'Видалити';
+    del.addEventListener('click', async () => {
+      const r = await db.from('photo_comments').delete().eq('id', c.id);
+      if (r.error) alert(r.error.message);
+      else loadComments(p);
+    });
+    top.appendChild(del);
+  }
+  const body = document.createElement('p');
+  body.className = 'cm-body';
+  body.appendChild(renderMentions(c.body));
+  d.append(top, body);
+  return d;
+}
+
 async function loadComments(p) {
   const { data, error } = await db.from('photo_comments').select('*').eq('photo_id', p.id).order('created_at', { ascending: true }).limit(300);
   if (ppCur !== p) return;
   const list = error ? [] : data || [];
   $('cmCount').textContent = list.length;
-  $('cmList').replaceChildren(...list.map(c => {
-    const d = document.createElement('div');
-    d.className = 'cm-item';
-    const top = document.createElement('div');
-    top.className = 'cm-top';
-    const nm = document.createElement('b');
-    nm.textContent = c.owner_name || '—';
-    linkUser(nm, c.owner_id);
-    const dt = document.createElement('small');
-    dt.textContent = new Date(c.created_at).toLocaleString('uk-UA');
-    top.append(nm, dt);
-    if (me.uid && (c.owner_id === me.uid || isPhotoMod())) {
-      const del = document.createElement('button');
-      del.type = 'button';
-      del.className = 'cm-del';
-      del.textContent = 'Видалити';
-      del.addEventListener('click', async () => {
-        const r = await db.from('photo_comments').delete().eq('id', c.id);
-        if (r.error) alert(r.error.message);
-        else loadComments(p);
-      });
-      top.appendChild(del);
-    }
-    if (me.uid && c.owner_id !== me.uid) {
-      const rp = document.createElement('button');
-      rp.type = 'button';
-      rp.className = 'cm-rep';
-      rp.textContent = 'Поскаржитись';
-      rp.addEventListener('click', () => openReport('comment', c.id, (c.owner_name || '') + ': ' + String(c.body).slice(0, 80)));
-      top.appendChild(rp);
-    }
-    const body = document.createElement('p');
-    body.className = 'cm-body';
-    body.textContent = c.body;
-    d.append(top, body);
-    return d;
-  }));
+  const byParent = {};
+  list.filter(c => c.parent_id).forEach(c => { (byParent[c.parent_id] = byParent[c.parent_id] || []).push(c); });
+  const nodes = [];
+  list.filter(c => !c.parent_id || !list.some(x => x.id === c.parent_id)).forEach(c => {
+    nodes.push(cmNode(p, c, false));
+    (byParent[c.id] || []).forEach(r => nodes.push(cmNode(p, r, true)));
+  });
+  $('cmList').replaceChildren(...nodes);
 }
 
 $('cmSend').addEventListener('click', async () => {
@@ -8243,13 +8632,16 @@ $('cmSend').addEventListener('click', async () => {
   }
   setMsg($('cmMsg'), '');
   $('cmSend').disabled = true;
-  const { error } = await db.from('photo_comments').insert({ photo_id: p.id, body });
+  const payload = { photo_id: p.id, body };
+  if (cmReply) payload.parent_id = cmReply.id;
+  const { error } = await db.from('photo_comments').insert(payload);
   $('cmSend').disabled = false;
   if (error) {
     setMsg($('cmMsg'), error.message);
     return;
   }
   $('cmText').value = '';
+  cmClearReply();
   await loadComments(p);
 });
 
@@ -8426,6 +8818,7 @@ async function openProfile(uid) {
   $('pfFollow').classList.add('hidden');
   $('pfFavBox').classList.add('hidden');
   $('pfFollowBox').classList.add('hidden');
+  $('pfAlbumsBox').classList.add('hidden');
   $('pfAvatar').classList.remove('own');
   $('pfAvatar').src = placeholder;
 
@@ -8523,6 +8916,7 @@ async function openProfile(uid) {
     return el;
   }));
   if (own) loadProfileExtras(uid);
+  loadProfileAlbums(uid, own);
 }
 
 $('pfSort').addEventListener('change', renderPfGrid);
@@ -8981,16 +9375,16 @@ $('vhBack').addEventListener('click', () => history.back());
 async function openVehicle(id) {
   if (!id) return;
   showPage('vehicleView', '#vehicle=' + id);
-  $('vhTitle').textContent = '…';
+  $('vpTitle').textContent = '…';
   $('vhFacts').replaceChildren();
   $('vhGrid').replaceChildren();
   $('vhEmpty').classList.add('hidden');
   const { data: v } = await db.from('vehicles').select('*').eq('id', id).maybeSingle();
   if ($('vehicleView').classList.contains('hidden')) return;
-  if (!v) { $('vhTitle').textContent = 'Транспорт не знайдено'; return; }
+  if (!v) { $('vpTitle').textContent = 'Транспорт не знайдено'; return; }
   const c = cities.find(x => x.id === v.city_id);
   const { data: ent } = await db.from('enterprises').select('name').eq('id', v.enterprise_id).maybeSingle();
-  $('vhTitle').textContent = [v.fleet_no, v.plate_no].filter(Boolean).join(' · ') || '—';
+  $('vpTitle').textContent = [v.fleet_no, v.plate_no].filter(Boolean).join(' · ') || '—';
   const st = VEH_STATUSES.find(x => x.key === v.status);
   const fact = (label, val, node) => {
     if (!val && !node) return null;
@@ -9124,6 +9518,173 @@ async function loadGalleryTop() {
   $('gDay').replaceChildren(phCard(day));
   $('gPop').replaceChildren(...list.filter(p => p !== day).slice(0, 4).map(phCard));
 }
+
+/* --- альбоми --- */
+$('alBack').addEventListener('click', () => history.back());
+
+function openAlbumDlg(opts) {
+  albumDlg = opts;
+  setMsg($('abMsg'), '');
+  const adding = opts.mode === 'add';
+  $('abPick').classList.toggle('hidden', !adding);
+  $('abTitle').textContent = adding ? 'Додати в альбом' : opts.mode === 'edit' ? 'Змінити альбом' : 'Новий альбом';
+  $('abName').value = opts.album ? opts.album.title : '';
+  $('abDesc').value = opts.album && opts.album.description ? opts.album.description : '';
+  if (adding) {
+    const sel = $('abPick');
+    sel.replaceChildren(...(opts.albums || []).map(a => new Option(a.title, a.id)), new Option('➕ Новий альбом…', 'new'));
+    sel.value = (opts.albums && opts.albums.length) ? opts.albums[0].id : 'new';
+    syncAlbumFields();
+  } else {
+    $('abName').classList.remove('hidden');
+    $('abDesc').classList.remove('hidden');
+  }
+  openModal('album');
+}
+function syncAlbumFields() {
+  const isNew = $('abPick').value === 'new';
+  $('abName').classList.toggle('hidden', !isNew);
+  $('abDesc').classList.toggle('hidden', !isNew);
+}
+$('abPick').addEventListener('change', syncAlbumFields);
+$('abCancel').addEventListener('click', closeModal);
+
+$('albumForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!albumDlg || !me.uid) return;
+  $('abSave').disabled = true;
+  setMsg($('abMsg'), '');
+  try {
+    const title = $('abName').value.trim();
+    const description = $('abDesc').value.trim() || null;
+    if (albumDlg.mode === 'edit') {
+      if (!title) throw new Error('Вкажіть назву альбому');
+      const { error } = await db.from('albums').update({ title, description }).eq('id', albumDlg.album.id);
+      if (error) throw error;
+      closeModal();
+      openAlbum(albumDlg.album.id);
+      return;
+    }
+    let albumId = null;
+    if (albumDlg.mode === 'create' || $('abPick').value === 'new') {
+      if (!title) throw new Error('Вкажіть назву альбому');
+      const r = await db.from('albums').insert({ title, description }).select('id').single();
+      if (r.error) throw r.error;
+      albumId = r.data.id;
+    } else {
+      albumId = $('abPick').value;
+    }
+    if (albumDlg.mode === 'add') {
+      const { error } = await db.from('album_photos').insert({ album_id: albumId, photo_id: albumDlg.photo.id });
+      if (error && !/duplicate|unique/i.test(error.message)) throw error;
+      closeModal();
+      alert('Додано в альбом');
+    } else {
+      closeModal();
+      if (location.hash === '#user=' + me.uid) openProfile(me.uid);
+    }
+  } catch (err) {
+    setMsg($('abMsg'), err.message || String(err));
+  } finally {
+    $('abSave').disabled = false;
+  }
+});
+
+function albumAct(p) {
+  return ppAct('📁', 'В альбом', async () => {
+    const { data } = await db.from('albums').select('id, title').eq('owner_id', me.uid).order('created_at', { ascending: false });
+    openAlbumDlg({ mode: 'add', photo: p, albums: data || [] });
+  });
+}
+
+async function openAlbum(id) {
+  if (!id) return;
+  showPage('albumView', '#album=' + id);
+  $('alTitle').textContent = '…';
+  $('alDesc').classList.add('hidden');
+  $('alActions').classList.add('hidden');
+  $('alMeta').replaceChildren();
+  $('alGrid').replaceChildren();
+  $('alEmpty').classList.add('hidden');
+  const { data: a } = await db.from('albums').select('*').eq('id', id).maybeSingle();
+  if ($('albumView').classList.contains('hidden')) return;
+  if (!a) { $('alTitle').textContent = 'Альбом не знайдено'; return; }
+  albumCur = a;
+  const own = a.owner_id === me.uid;
+  $('alTitle').textContent = a.title;
+  if (a.description) { $('alDesc').textContent = a.description; $('alDesc').classList.remove('hidden'); }
+  $('alActions').classList.toggle('hidden', !(own || isStaff()));
+  $('alEdit').classList.toggle('hidden', !own);
+  const { data: au } = await db.from('profiles').select('id, username').eq('id', a.owner_id).maybeSingle();
+  const link = document.createElement('b');
+  link.textContent = au ? au.username : '—';
+  if (au) linkUser(link, au.id);
+  $('alMeta').append('Автор: ', link, ' · ' + new Date(a.created_at).toLocaleDateString('uk-UA'));
+  const { data: ap } = await db.from('album_photos').select('photo_id').eq('album_id', id).order('added_at', { ascending: false }).limit(300);
+  const ids = (ap || []).map(x => x.photo_id);
+  let list = [];
+  if (ids.length) {
+    const r = await db.from('photos').select('*').in('id', ids);
+    list = (r.data || []).sort((x, y) => ids.indexOf(x.id) - ids.indexOf(y.id));
+    await enrichPhotos(list);
+  }
+  if ($('albumView').classList.contains('hidden')) return;
+  $('alGrid').replaceChildren(...list.map(p => {
+    const card = phCard(p);
+    if (own) {
+      card.classList.add('has-rm');
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'al-rm';
+      rm.textContent = '✕';
+      rm.title = 'Прибрати з альбому';
+      rm.addEventListener('click', async ev => {
+        ev.stopPropagation();
+        const { error } = await db.from('album_photos').delete().eq('album_id', id).eq('photo_id', p.id);
+        if (error) { alert(error.message); return; }
+        openAlbum(id);
+      });
+      card.appendChild(rm);
+    }
+    return card;
+  }));
+  $('alEmpty').classList.toggle('hidden', list.length > 0);
+}
+$('alEdit').addEventListener('click', () => { if (albumCur) openAlbumDlg({ mode: 'edit', album: albumCur }); });
+$('alDelete').addEventListener('click', async () => {
+  if (!albumCur || !confirm('Видалити альбом «' + albumCur.title + '»? Фото залишаться на сайті.')) return;
+  const owner = albumCur.owner_id;
+  const { error } = await db.from('albums').delete().eq('id', albumCur.id);
+  if (error) { alert(error.message); return; }
+  openProfile(owner);
+});
+
+async function loadProfileAlbums(uid, own) {
+  $('pfAlbumsBox').classList.remove('hidden');
+  $('pfAlbumNew').classList.toggle('hidden', !own);
+  const { data } = await db.from('albums').select('id, title').eq('owner_id', uid).order('created_at', { ascending: false }).limit(60);
+  if ($('profileView').classList.contains('hidden')) return;
+  const list = data || [];
+  $('pfAlbums').replaceChildren(...list.map(a => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn';
+    b.textContent = '📁 ' + a.title;
+    b.addEventListener('click', () => openAlbum(a.id));
+    return b;
+  }));
+  $('pfAlbumsEmpty').classList.toggle('hidden', list.length > 0);
+  if (!list.length && !own) $('pfAlbumsBox').classList.add('hidden');
+}
+$('pfAlbumNew').addEventListener('click', () => openAlbumDlg({ mode: 'create' }));
+
+/* --- лічильник відвідувань (один раз за сеанс, без cookie) --- */
+try {
+  if (!sessionStorage.getItem('tv')) {
+    sessionStorage.setItem('tv', '1');
+    Promise.resolve(db.rpc('track_visit')).catch(() => {});
+  }
+} catch (e) { /* sessionStorage недоступний */ }
 
 /* --- режим технічних робіт --- */
 async function checkMaintenance() {
