@@ -2,6 +2,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f1f1f">
+<link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 html, body {
@@ -970,6 +973,24 @@ nav #navName { cursor: pointer; }
 .set-note { font-size: 13px; opacity: .8; margin: 8px 0; }
 #settingsView textarea { width: 100%; margin: 6px 0; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(128,128,128,.4); background: transparent; color: inherit; font: inherit; resize: vertical; box-sizing: border-box; }
 .pf-cities { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 24px; }
+#reportForm select, #reportForm textarea { width: 100%; padding: 11px 14px; border: 1px solid #dcdcdc; border-radius: 12px; background: transparent; color: inherit; font: inherit; margin-bottom: 10px; box-sizing: border-box; }
+.srch-bar { display: flex; gap: 8px; margin: 10px 0 14px; }
+.srch-bar input { flex: 1; }
+.sr-row { display: flex; gap: 14px; align-items: center; padding: 12px 14px; border-radius: 14px; background: rgba(128,128,128,.12); margin-bottom: 8px; cursor: pointer; }
+.sr-row:hover { background: rgba(128,128,128,.2); }
+.sr-no { font-weight: 800; font-size: 18px; min-width: 76px; }
+.sr-sub { opacity: .75; font-size: 13px; }
+.vh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin: 12px 0 20px; }
+.vh-fact { padding: 10px 12px; border-radius: 12px; background: rgba(128,128,128,.12); }
+.vh-fact small { display: block; opacity: .65; font-size: 12px; }
+.vh-fact b { font-size: 15px; overflow-wrap: anywhere; }
+#mapBox { height: 68vh; min-height: 360px; border-radius: 14px; overflow: hidden; margin-top: 10px; z-index: 0; }
+#maint { position: fixed; inset: 0; z-index: 2000; background: #121212; color: #eee; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 24px; gap: 12px; }
+#maint.hidden { display: none; }
+#maint button { margin-top: 8px; }
+#gTop h3 { margin: 14px 0 8px; }
+.cm-rep { background: none; border: none; color: inherit; opacity: .55; cursor: pointer; font-size: 12px; margin-left: 8px; }
+.cm-rep:hover { opacity: 1; text-decoration: underline; }
 .cv-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cv-photo {
   overflow: hidden;
@@ -2763,6 +2784,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
             <b id="viEditor"></b>
             <button class="btn" id="edAdd" type="button" style="display:none;margin-left:8px">＋ Додати</button>
             <button class="btn" id="edDel" type="button" style="display:none">− Прибрати</button>
+            <button class="btn hidden" id="cvFollow" type="button" style="margin-left:8px">🔔 Підписатися</button>
           </div>
           <div class="cv-btns">
             <div id="viActions" class="cv-act hidden">
@@ -2836,6 +2858,12 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
       <label class="cv-route"><span>Маршрут</span><input id="gRoute" type="text"></label>
       <div class="dd" id="ddGCategory"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
     </div>
+    <div id="gTop" class="hidden">
+      <h3 class="cv-about-title">Фото дня</h3>
+      <div id="gDay" class="ph-grid"></div>
+      <h3 class="cv-about-title">Популярне за місяць</h3>
+      <div id="gPop" class="ph-grid"></div>
+    </div>
     <div class="cv-gallerybar"><button class="btn light" id="gSort" type="button">Датою публікації (найновіші)</button></div>
     <div id="gGrid" class="ph-grid"></div>
     <p id="gEmpty" class="cv-empty">Фотографій поки немає</p>
@@ -2850,6 +2878,37 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
   </div>
 </div>
 
+<div id="searchView" class="panel hidden">
+  <div class="cv-tabpane">
+    <h2 class="cv-about-title">Пошук транспорту</h2>
+    <div class="srch-bar">
+      <input id="srQ" class="cv-search" type="text" maxlength="30" placeholder="Бортовий або державний номер">
+      <button class="btn dark" id="srGo" type="button">Шукати</button>
+    </div>
+    <p id="srMsg" class="msg"></p>
+    <div id="srList"></div>
+  </div>
+</div>
+
+<div id="vehicleView" class="panel hidden">
+  <div class="cv-tabpane">
+    <div class="pp-top"><button class="btn light" id="vhBack" type="button">← Назад</button></div>
+    <h2 id="vhTitle" class="cv-about-title"></h2>
+    <div id="vhFacts" class="vh-grid"></div>
+    <h3 class="cv-about-title">Фото</h3>
+    <div id="vhGrid" class="ph-grid"></div>
+    <p id="vhEmpty" class="cv-empty hidden">Фотографій поки немає</p>
+  </div>
+</div>
+
+<div id="mapView" class="panel hidden">
+  <div class="cv-tabpane">
+    <h2 class="cv-about-title">Карта міст</h2>
+    <p id="mapMsg" class="msg"></p>
+    <div id="mapBox"></div>
+  </div>
+</div>
+
 <div id="profileView" class="panel hidden">
   <div class="cv-tabpane">
     <div class="pf-head">
@@ -2861,6 +2920,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         <div id="pfActions" class="pf-actions">
           <button class="btn hidden" id="pfSettings" type="button">⚙️ Налаштування акаунта</button>
           <button class="btn" id="pfCopy" type="button">🔗 Скопіювати посилання</button>
+          <button class="btn hidden" id="pfFollow" type="button">🔔 Підписатися</button>
         </div>
       </div>
     </div>
@@ -2877,6 +2937,16 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     </div>
     <div id="pfGrid" class="ph-grid"></div>
     <p id="pfEmpty" class="cv-empty hidden">Фото поки немає</p>
+    <div id="pfFavBox" class="hidden">
+      <h3 class="cv-about-title">Обране</h3>
+      <div id="pfFav" class="ph-grid"></div>
+      <p id="pfFavEmpty" class="cv-empty hidden">В обраному поки порожньо</p>
+    </div>
+    <div id="pfFollowBox" class="hidden">
+      <h3 class="cv-about-title">Підписки</h3>
+      <div id="pfFollows" class="pf-cities"></div>
+      <p id="pfFollowsEmpty" class="cv-empty hidden">Підписок поки немає</p>
+    </div>
   </div>
 </div>
 
@@ -3009,6 +3079,8 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     <div class="side-block">
       <h3>Пункти</h3>
       <button class="side-item" id="openGallery" type="button">Фотогалерея</button>
+      <button class="side-item" id="openSearch" type="button">🔎 Пошук транспорту</button>
+      <button class="side-item" id="openMap" type="button">🗺️ Карта</button>
       <button class="side-item" id="openMy" type="button">Мої фото</button>
       <button class="side-item" type="button">Схеми</button>
       <button class="side-item" id="openCreateCity" type="button">Створити місто</button>
@@ -3037,6 +3109,21 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
       <p id="loginMsg" class="msg"></p>
       <p class="switch"><button class="link" id="toForgot" type="button">Забули пароль?</button></p>
       <p class="switch">Немає акаунта? <button class="link" id="toRegister" type="button">Реєстрація</button></p>
+    </form>
+
+    <form id="reportForm" class="view">
+      <h2>Поскаржитись</h2>
+      <p id="repTarget" class="msg"></p>
+      <select id="repReason">
+        <option value="spam">Спам</option>
+        <option value="inappropriate">Неприйнятний вміст</option>
+        <option value="copyright">Порушення авторських прав</option>
+        <option value="other">Інше</option>
+      </select>
+      <textarea id="repDetails" rows="3" maxlength="500" placeholder="Деталі (необов’язково)"></textarea>
+      <button class="btn dark" id="repSend" type="submit">Надіслати скаргу</button>
+      <p id="repMsg" class="msg"></p>
+      <p class="switch"><button class="link" id="repCancel" type="button">Скасувати</button></p>
     </form>
 
     <form id="forgotForm" class="view">
@@ -3098,6 +3185,9 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         <label>Населення<input id="cityPopulation" type="number" min="0" step="1"></label>
         <label>Рік заснування<input id="cityFounded" type="number" step="1"></label>
         <label>Площа (км²)<input id="cityArea" type="number" min="0" step="any"></label>
+        <label>Широта<input id="cityLat" type="number" step="any" min="-90" max="90"></label>
+        <label>Довгота<input id="cityLng" type="number" step="any" min="-180" max="180"></label>
+        <div class="full"><button class="btn light" id="cityGeo" type="button">📍 Знайти координати за назвою</button></div>
         <label class="full">Контакти автора<input id="cityContacts" type="text" maxlength="300"></label>
         <label class="full">Опис<textarea id="cityDesc" rows="5" maxlength="5000"></textarea></label>
       </div>
@@ -3354,6 +3444,11 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
   </div>
 </div>
 
+<div id="maint" class="hidden">
+  <h1>🛠️ Технічні роботи</h1>
+  <p id="maintText"></p>
+  <button class="btn light" id="maintLogin" type="button">Вхід для персоналу</button>
+</div>
 <script>
 const SUPABASE_URL = 'https://fslbfqgzpsbkzbzamasa.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Et7XDaX49e_J4RqfnoTpcA_e5yHEsS-';
@@ -3408,7 +3503,7 @@ const $ = id => document.getElementById(id);
 const placeholder = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44"><rect width="44" height="44" fill="#d9d9d9"/><circle cx="22" cy="17" r="8" fill="#9a9a9a"/><path d="M6 44c0-10 7-16 16-16s16 6 16 16z" fill="#9a9a9a"/></svg>');
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 const maxSize = 2 * 1024 * 1024;
-const views = { login: $('loginForm'), register: $('registerForm'), pending: $('pendingView'), city: $('cityForm'), pick: $('pickView'), reason: $('reasonView'), notif: $('notifView'), ent: $('entForm'), veh: $('vehForm'), route: $('routeForm'), routeInfo: $('routeInfo'), settings: $('settingsView'), forgot: $('forgotForm'), reset: $('resetForm'), dup: $('dupForm'), ban: $('banView'), vehInfo: $('vehInfo'), import: $('importView'), photoUp: $('photoUp'), photoView: $('photoView'), confirmed: $('confirmedView') };
+const views = { login: $('loginForm'), register: $('registerForm'), pending: $('pendingView'), city: $('cityForm'), pick: $('pickView'), reason: $('reasonView'), notif: $('notifView'), ent: $('entForm'), veh: $('vehForm'), route: $('routeForm'), routeInfo: $('routeInfo'), settings: $('settingsView'), report: $('reportForm'), forgot: $('forgotForm'), reset: $('resetForm'), dup: $('dupForm'), ban: $('banView'), vehInfo: $('vehInfo'), import: $('importView'), photoUp: $('photoUp'), photoView: $('photoView'), confirmed: $('confirmedView') };
 
 let me = { uid: null, role: null };
 const LANGS = ['uk', 'ru', 'en'];
@@ -3487,6 +3582,8 @@ async function render(session) {
     me = { uid: null, role: null };
     $('openImport').classList.add('hidden');
     $('setAccount').classList.add('hidden');
+    myFollows.clear();
+    checkMaintenance();
     $('guest').classList.remove('hidden');
     $('user').classList.add('hidden');
     renderCity();
@@ -3513,6 +3610,8 @@ async function render(session) {
   $('openRequests').classList.add('hidden'); // модерація тепер в окремій адмін-панелі
   $('openImport').classList.toggle('hidden', me.role !== 'owner');
   $('setAccount').classList.remove('hidden');
+  loadFollows();
+  checkMaintenance();
   loadNotifs();
   const badge = $('navBadge');
   badge.className = 'badge';
@@ -3780,6 +3879,7 @@ let delTimer = null;
 let shownId = null;
 let owners = {};
 let cityEditors = {};
+const myFollows = new Set();
 
 function renderSources(text) {
   const parts = (text || '').split(/[\s,;]+/).filter(Boolean);
@@ -3893,6 +3993,7 @@ function renderCity() {
     cph.textContent = 'Фото міста';
   }
   $('cvPhotoBtn').style.display = (me.role === 'owner' || isOwn || isCityEditor(c)) ? '' : 'none';
+  updateFollowBtn($('cvFollow'), 'city', c.id, !c.is_published);
   renderSources(c.author_contacts);
   if (entCity !== currentId) {
     entCity = currentId;
@@ -4003,6 +4104,8 @@ $('editCity').addEventListener('click', () => {
   $('cityPopulation').value = c.population != null ? c.population : '';
   $('cityFounded').value = c.founded_year != null ? c.founded_year : '';
   $('cityArea').value = c.area_km2 != null ? c.area_km2 : '';
+  $('cityLat').value = c.lat != null ? c.lat : '';
+  $('cityLng').value = c.lng != null ? c.lng : '';
   $('cityContacts').value = c.author_contacts || '';
   $('cityDesc').value = c.description || '';
   $('cityTitle').textContent = 'Редагувати місто';
@@ -4093,6 +4196,18 @@ $('cityForm').addEventListener('submit', async e => {
     author_contacts: text('cityContacts'),
     description: text('cityDesc')
   };
+  const la = num('cityLat');
+  const ln = num('cityLng');
+  if ((la == null) !== (ln == null)) {
+    setMsg($('cityMsg'), 'Вкажіть обидві координати або жодної');
+    return;
+  }
+  if (la != null && (!(la >= -90 && la <= 90) || !(ln >= -180 && ln <= 180))) {
+    setMsg($('cityMsg'), 'Невірні координати');
+    return;
+  }
+  const hadCoords = !!editingId && (cities.find(x => x.id === editingId) || {}).lat != null;
+  if (la != null || hadCoords) { row.lat = la; row.lng = ln; }
   if (!row.name || !row.country) {
     setMsg($('cityMsg'), 'Заповни назву і країну');
     return;
@@ -5292,6 +5407,48 @@ function applyAccountPrefs(p) {
 
 const DICT = Object.create(null);
 [
+  ['Поскаржитись', 'Пожаловаться', 'Report'],
+  ['Надіслати скаргу', 'Отправить жалобу', 'Send report'],
+  ['Спам', 'Спам', 'Spam'],
+  ['Неприйнятний вміст', 'Недопустимое содержимое', 'Inappropriate content'],
+  ['Порушення авторських прав', 'Нарушение авторских прав', 'Copyright violation'],
+  ['Інше', 'Другое', 'Other'],
+  ['Деталі (необов’язково)', 'Детали (необязательно)', 'Details (optional)'],
+  ['Ви вже скаржились на це', 'Вы уже жаловались на это', 'You have already reported this'],
+  ['🔔 Підписатися', '🔔 Подписаться', '🔔 Follow'],
+  ['🔕 Ви підписані', '🔕 Вы подписаны', '🔕 Following'],
+  ['В обране', 'В избранное', 'Add to favorites'],
+  ['В обраному', 'В избранном', 'In favorites'],
+  ['Обране', 'Избранное', 'Favorites'],
+  ['Підписки', 'Подписки', 'Following'],
+  ['Підписок поки немає', 'Подписок пока нет', 'No subscriptions yet'],
+  ['В обраному поки порожньо', 'В избранном пока пусто', 'Favorites are empty'],
+  ['🔎 Пошук транспорту', '🔎 Поиск транспорта', '🔎 Vehicle search'],
+  ['Пошук транспорту', 'Поиск транспорта', 'Vehicle search'],
+  ['🗺️ Карта', '🗺️ Карта', '🗺️ Map'],
+  ['Карта міст', 'Карта городов', 'Map of cities'],
+  ['Шукати', 'Искать', 'Search'],
+  ['Бортовий або державний номер', 'Бортовой или государственный номер', 'Fleet or plate number'],
+  ['Нічого не знайдено', 'Ничего не найдено', 'Nothing found'],
+  ['Введіть номер', 'Введите номер', 'Enter a number'],
+  ['Фото дня', 'Фото дня', 'Photo of the day'],
+  ['Популярне за місяць', 'Популярное за месяц', 'Popular this month'],
+  ['Широта', 'Широта', 'Latitude'],
+  ['Довгота', 'Долгота', 'Longitude'],
+  ['📍 Знайти координати за назвою', '📍 Найти координаты по названию', '📍 Find coordinates by name'],
+  ['Технічні роботи', 'Технические работы', 'Maintenance'],
+  ['Вхід для персоналу', 'Вход для персонала', 'Staff login'],
+  ['Транспорт не знайдено', 'Транспорт не найден', 'Vehicle not found'],
+  ['Модель', 'Модель', 'Model'],
+  ['Рік випуску', 'Год выпуска', 'Year built'],
+  ['Заводський №', 'Заводской №', 'Serial no.'],
+  ['Початок експлуатації', 'Начало эксплуатации', 'In service since'],
+  ['Прибув', 'Прибыл', 'Arrived'],
+  ['Списаний', 'Списан', 'Written off'],
+  ['Примітка', 'Примечание', 'Note'],
+  ['Місто', 'Город', 'City'],
+  ['Статус', 'Статус', 'Status'],
+  ['Поки жодному місту не вказано координати.', 'Пока ни одному городу не указаны координаты.', 'No city has coordinates yet.'],
   ['Досягнення', 'Достижения', 'Achievements'],
   ['Перегляди', 'Просмотры', 'Views'],
   ['Рейтинг', 'Рейтинг', 'Rating'],
@@ -6979,7 +7136,7 @@ let phSugTimer = null;
 let phEditId = null;
 let myPhotos = [];
 const UP_FIELDS = ['phFleet', 'phRoute', 'phRouteNote', 'phNote', 'phTags', 'phDD', 'phMM', 'phYYYY', 'phPlace'];
-const PAGES = ['requestsView', 'galleryView', 'myView', 'uploadView', 'photoPage', 'profileView'];
+const PAGES = ['requestsView', 'galleryView', 'myView', 'uploadView', 'photoPage', 'profileView', 'searchView', 'vehicleView', 'mapView'];
 const DATE_KINDS = [['exact', 'Точна дата'], ['approx', 'Приблизна дата'], ['before', 'Не пізніше'], ['after', 'Не раніше'], ['unknown', 'Невідома дата']];
 
 function phSetBtn(id, text) {
@@ -7263,6 +7420,9 @@ function route(fromPop) {
   else if (h === '#gallery') openGallery();
   else if (h.startsWith('#photo=')) openPhotoById(h.slice(7));
   else if (h.startsWith('#user=')) openProfile(h.slice(6));
+  else if (h.startsWith('#search')) openSearch(decodeURIComponent(h.slice(8) || ''));
+  else if (h.startsWith('#vehicle=')) openVehicle(h.slice(9));
+  else if (h === '#map') openMap();
   else if (fromPop) PAGES.forEach(id => $(id).classList.add('hidden'));
 }
 window.addEventListener('popstate', () => route(true));
@@ -7778,6 +7938,7 @@ function openGallery() {
   showPage('galleryView', '#gallery');
   renderGallery();
   loadGallery();
+  loadGalleryTop();
 }
 $('openGallery').addEventListener('click', openGallery);
 
@@ -7901,9 +8062,15 @@ function openPhoto(p) {
     v.appendChild(vm);
     info.push(v);
     if (p.fleet_no || p.plate_no) {
-      db.from('vehicles').select('build_year, status').eq('city_id', p.city_id).eq(p.fleet_no ? 'fleet_no' : 'plate_no', p.fleet_no || p.plate_no).limit(1).then(r => {
+      db.from('vehicles').select('id, build_year, status').eq('city_id', p.city_id).eq(p.fleet_no ? 'fleet_no' : 'plate_no', p.fleet_no || p.plate_no).limit(1).then(r => {
         const x = r.data && r.data[0];
         if (ppCur !== p || !x) return;
+        const fl = v.querySelector('.pp-fleet');
+        if (fl && x.id) {
+          fl.style.cursor = 'pointer';
+          fl.title = 'Відкрити сторінку транспорту';
+          fl.addEventListener('click', () => openVehicle(x.id));
+        }
         if (x.build_year) sm.textContent = [x.build_year, sm.textContent].filter(Boolean).join(' · ');
         const c = statColor(VEH_STATUSES, x.status);
         if (c) $('photoPage').style.setProperty('--vc', c);
@@ -7954,6 +8121,8 @@ function openPhoto(p) {
     }
     setTimeout(() => { s.textContent = 'Поділитись фотографією'; }, 2000);
   }));
+  side.push(favAct(p));
+  if (p.owner_id !== me.uid) side.push(ppAct('⚑', 'Поскаржитись', () => openReport('photo', p.id, (p.city_name || '') + (p.enterprise_name ? ' · ' + p.enterprise_name : ''))));
   if (me.uid && (p.owner_id === me.uid || isPhotoMod())) {
     side.push(ppAct('✎', 'Редагувати', () => openPhotoForm(p)));
     side.push(ppAct('🗑', 'Видалити', async (b, s) => {
@@ -8043,6 +8212,14 @@ async function loadComments(p) {
         else loadComments(p);
       });
       top.appendChild(del);
+    }
+    if (me.uid && c.owner_id !== me.uid) {
+      const rp = document.createElement('button');
+      rp.type = 'button';
+      rp.className = 'cm-rep';
+      rp.textContent = 'Поскаржитись';
+      rp.addEventListener('click', () => openReport('comment', c.id, (c.owner_name || '') + ': ' + String(c.body).slice(0, 80)));
+      top.appendChild(rp);
     }
     const body = document.createElement('p');
     body.className = 'cm-body';
@@ -8246,6 +8423,9 @@ async function openProfile(uid) {
   $('pfEmpty').classList.add('hidden');
   $('pfCitiesEmpty').classList.add('hidden');
   $('pfSettings').classList.add('hidden');
+  $('pfFollow').classList.add('hidden');
+  $('pfFavBox').classList.add('hidden');
+  $('pfFollowBox').classList.add('hidden');
   $('pfAvatar').classList.remove('own');
   $('pfAvatar').src = placeholder;
 
@@ -8264,6 +8444,7 @@ async function openProfile(uid) {
   $('pfAvatar').src = p.avatar_url || placeholder;
   $('pfAvatar').classList.toggle('own', own);
   $('pfSettings').classList.toggle('hidden', !own);
+  updateFollowBtn($('pfFollow'), 'user', uid, own);
   const bd = $('pfBadge');
   bd.className = 'badge';
   if (['owner', 'admin', 'photomod'].includes(p.role)) {
@@ -8341,6 +8522,7 @@ async function openProfile(uid) {
     el.append(a.ico, ' ', mk('span', a.t));
     return el;
   }));
+  if (own) loadProfileExtras(uid);
 }
 
 $('pfSort').addEventListener('change', renderPfGrid);
@@ -8593,6 +8775,370 @@ $('resetForm').addEventListener('submit', async e => {
   closeModal();
   alert('Пароль змінено');
 });
+
+/* ============ скарги, підписки, обране, пошук, карта, техробіти ============ */
+
+/* --- скарги --- */
+let reportTarget = null;
+function openReport(type, id, label) {
+  if (!me.uid) { openModal('login'); return; }
+  reportTarget = { type, id };
+  openModal('report');
+  $('repTarget').textContent = label || '';
+  $('repReason').value = 'spam';
+  $('repDetails').value = '';
+  setMsg($('repMsg'), '');
+}
+$('reportForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!reportTarget) return;
+  $('repSend').disabled = true;
+  const { error } = await db.from('reports').insert({
+    target_type: reportTarget.type, target_id: reportTarget.id,
+    reason: $('repReason').value, details: $('repDetails').value.trim() || null
+  });
+  $('repSend').disabled = false;
+  if (error) { setMsg($('repMsg'), /duplicate|unique/i.test(error.message) ? 'Ви вже скаржились на це' : error.message); return; }
+  closeModal();
+  alert('Дякуємо! Скаргу надіслано модераторам.');
+});
+$('repCancel').addEventListener('click', closeModal);
+
+/* --- підписки --- */
+const fKey = (k, id) => k + ':' + id;
+function updateFollowBtn(btn, kind, id, hide) {
+  btn.classList.toggle('hidden', !!hide);
+  btn.dataset.kind = kind;
+  btn.dataset.id = id;
+  btn.textContent = myFollows.has(fKey(kind, id)) ? '🔕 Ви підписані' : '🔔 Підписатися';
+}
+function syncFollowButtons() {
+  [$('cvFollow'), $('pfFollow')].forEach(b => {
+    if (b.dataset.kind && !b.classList.contains('hidden')) updateFollowBtn(b, b.dataset.kind, b.dataset.id, false);
+  });
+}
+async function loadFollows() {
+  myFollows.clear();
+  if (!me.uid) return;
+  const { data } = await db.from('follows').select('kind, target_id').eq('user_id', me.uid).limit(500);
+  (data || []).forEach(f => myFollows.add(fKey(f.kind, f.target_id)));
+  syncFollowButtons();
+}
+async function toggleFollow(btn) {
+  if (!me.uid) { openModal('login'); return; }
+  const kind = btn.dataset.kind, id = btn.dataset.id, k = fKey(kind, id);
+  const on = myFollows.has(k);
+  btn.disabled = true;
+  const r = on
+    ? await db.from('follows').delete().eq('kind', kind).eq('target_id', id).eq('user_id', me.uid)
+    : await db.from('follows').insert({ kind, target_id: id });
+  btn.disabled = false;
+  if (r.error) { alert(r.error.message); return; }
+  if (on) myFollows.delete(k); else myFollows.add(k);
+  updateFollowBtn(btn, kind, id, false);
+}
+$('cvFollow').addEventListener('click', e => toggleFollow(e.currentTarget));
+$('pfFollow').addEventListener('click', e => toggleFollow(e.currentTarget));
+
+/* --- обране --- */
+function favAct(p) {
+  let on = false;
+  const set = v => {
+    on = v;
+    btn.querySelector('i').textContent = v ? '♥' : '♡';
+    btn.querySelector('span').textContent = v ? 'В обраному' : 'В обране';
+  };
+  const btn = ppAct('♡', 'В обране', async () => {
+    if (!me.uid) { openModal('login'); return; }
+    const r = on
+      ? await db.from('favorites').delete().eq('photo_id', p.id).eq('user_id', me.uid)
+      : await db.from('favorites').insert({ photo_id: p.id });
+    if (r.error) { alert(r.error.message); return; }
+    set(!on);
+  });
+  if (me.uid) {
+    db.from('favorites').select('photo_id').eq('photo_id', p.id).eq('user_id', me.uid).maybeSingle().then(r => {
+      if (ppCur === p && r.data) set(true);
+    });
+  }
+  return btn;
+}
+
+async function loadProfileExtras(uid) {
+  $('pfFavBox').classList.remove('hidden');
+  $('pfFollowBox').classList.remove('hidden');
+  const [fv, fl] = await Promise.all([
+    db.from('favorites').select('photo_id').eq('user_id', uid).order('created_at', { ascending: false }).limit(60),
+    db.from('follows').select('kind, target_id').eq('user_id', uid).order('created_at', { ascending: false }).limit(200)
+  ]);
+  if ($('profileView').classList.contains('hidden') || uid !== me.uid) return;
+  const favIds = (fv.data || []).map(x => x.photo_id);
+  let favPhotos = [];
+  if (favIds.length) {
+    const r = await db.from('photos').select('*').in('id', favIds);
+    favPhotos = (r.data || []).sort((a, b) => favIds.indexOf(a.id) - favIds.indexOf(b.id));
+    await enrichPhotos(favPhotos);
+  }
+  $('pfFav').replaceChildren(...favPhotos.map(phCard));
+  $('pfFavEmpty').classList.toggle('hidden', favPhotos.length > 0);
+
+  const follows = fl.data || [];
+  const userIds = follows.filter(f => f.kind === 'user').map(f => f.target_id);
+  const names = {};
+  if (userIds.length) {
+    const r = await db.from('profiles').select('id, username').in('id', userIds);
+    (r.data || []).forEach(p => { names[p.id] = p.username; });
+  }
+  const chips = follows.map(f => {
+    const label = f.kind === 'city'
+      ? '🏙️ ' + ((cities.find(c => c.id === f.target_id) || {}).name || '—')
+      : '👤 ' + (names[f.target_id] || '—');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn';
+    b.textContent = label;
+    b.title = 'Відкрити';
+    b.addEventListener('click', () => (f.kind === 'city' ? showCity(f.target_id) : openProfile(f.target_id)));
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.className = 'btn light';
+    x.textContent = '✕';
+    x.title = 'Відписатися';
+    x.addEventListener('click', async () => {
+      const r = await db.from('follows').delete().eq('kind', f.kind).eq('target_id', f.target_id).eq('user_id', me.uid);
+      if (r.error) { alert(r.error.message); return; }
+      myFollows.delete(fKey(f.kind, f.target_id));
+      syncFollowButtons();
+      loadProfileExtras(uid);
+    });
+    const wrap = document.createElement('span');
+    wrap.style.cssText = 'display:inline-flex;gap:4px';
+    wrap.append(b, x);
+    return wrap;
+  });
+  $('pfFollows').replaceChildren(...chips);
+  $('pfFollowsEmpty').classList.toggle('hidden', chips.length > 0);
+}
+
+/* --- пошук транспорту і сторінка транспорту --- */
+const cleanQ = s => String(s || '').replace(/[^\p{L}\p{N}\- ]/gu, ' ').replace(/\s+/g, ' ').trim().slice(0, 30);
+
+function openSearch(q) {
+  showPage('searchView', '#search' + (q ? '=' + encodeURIComponent(q) : ''));
+  $('srQ').value = q || '';
+  $('srList').replaceChildren();
+  setMsg($('srMsg'), '');
+  if (q) runSearch(q); else $('srQ').focus();
+}
+
+async function runSearch(raw) {
+  const q = cleanQ(raw);
+  if (!q) { setMsg($('srMsg'), 'Введіть номер'); return; }
+  setMsg($('srMsg'), '');
+  history.replaceState(null, '', '#search=' + encodeURIComponent(q));
+  const { data, error } = await db.from('vehicles')
+    .select('id, city_id, enterprise_id, fleet_no, plate_no, model, status')
+    .or('fleet_no.ilike.%' + q + '%,plate_no.ilike.%' + q + '%').limit(60);
+  if (error) { setMsg($('srMsg'), error.message); return; }
+  const low = q.toLowerCase();
+  const list = (data || []).sort((a, b) => {
+    const ea = [a.fleet_no, a.plate_no].some(x => String(x || '').toLowerCase() === low) ? 0 : 1;
+    const eb = [b.fleet_no, b.plate_no].some(x => String(x || '').toLowerCase() === low) ? 0 : 1;
+    return ea - eb;
+  });
+  if (!list.length) { $('srList').replaceChildren(); setMsg($('srMsg'), 'Нічого не знайдено'); return; }
+  const entIds = [...new Set(list.map(v => v.enterprise_id).filter(Boolean))];
+  const ents = {};
+  if (entIds.length) {
+    const r = await db.from('enterprises').select('id, name').in('id', entIds);
+    (r.data || []).forEach(x => { ents[x.id] = x.name; });
+  }
+  $('srList').replaceChildren(...list.map(v => {
+    const c = cities.find(x => x.id === v.city_id);
+    const st = VEH_STATUSES.find(x => x.key === v.status);
+    const row = document.createElement('div');
+    row.className = 'sr-row';
+    const no = document.createElement('span');
+    no.className = 'sr-no';
+    no.textContent = v.fleet_no || v.plate_no || '—';
+    const mid = document.createElement('div');
+    const t = document.createElement('div');
+    t.textContent = [v.model, v.fleet_no && v.plate_no ? v.plate_no : ''].filter(Boolean).join(' · ') || '—';
+    const sub = document.createElement('div');
+    sub.className = 'sr-sub';
+    sub.textContent = [c && c.name, ents[v.enterprise_id], st && st.name].filter(Boolean).join(' · ');
+    mid.append(t, sub);
+    row.append(no, mid);
+    row.addEventListener('click', () => openVehicle(v.id));
+    return row;
+  }));
+}
+$('srGo').addEventListener('click', () => runSearch($('srQ').value));
+$('srQ').addEventListener('keydown', e => { if (e.key === 'Enter') runSearch($('srQ').value); });
+$('openSearch').addEventListener('click', () => openSearch(''));
+$('vhBack').addEventListener('click', () => history.back());
+
+async function openVehicle(id) {
+  if (!id) return;
+  showPage('vehicleView', '#vehicle=' + id);
+  $('vhTitle').textContent = '…';
+  $('vhFacts').replaceChildren();
+  $('vhGrid').replaceChildren();
+  $('vhEmpty').classList.add('hidden');
+  const { data: v } = await db.from('vehicles').select('*').eq('id', id).maybeSingle();
+  if ($('vehicleView').classList.contains('hidden')) return;
+  if (!v) { $('vhTitle').textContent = 'Транспорт не знайдено'; return; }
+  const c = cities.find(x => x.id === v.city_id);
+  const { data: ent } = await db.from('enterprises').select('name').eq('id', v.enterprise_id).maybeSingle();
+  $('vhTitle').textContent = [v.fleet_no, v.plate_no].filter(Boolean).join(' · ') || '—';
+  const st = VEH_STATUSES.find(x => x.key === v.status);
+  const fact = (label, val, node) => {
+    if (!val && !node) return null;
+    const d = document.createElement('div');
+    d.className = 'vh-fact';
+    const s = document.createElement('small');
+    s.textContent = label;
+    const b = document.createElement('b');
+    if (node) b.appendChild(node); else b.textContent = val;
+    d.append(s, b);
+    return d;
+  };
+  let cityNode = null;
+  if (c) {
+    cityNode = document.createElement('a');
+    cityNode.href = '#';
+    cityNode.textContent = c.name;
+    cityNode.addEventListener('click', e => { e.preventDefault(); showCity(c.id); });
+  }
+  $('vhFacts').replaceChildren(...[
+    fact('Місто', null, cityNode),
+    fact('Підприємство', ent && ent.name),
+    fact('Модель', v.model),
+    fact('Рік випуску', v.build_year),
+    fact('Заводський №', v.factory_no),
+    fact('VIN', v.vin),
+    fact('Статус', st && st.name),
+    fact('Початок експлуатації', v.start_date),
+    fact('Прибув', v.arrived),
+    fact('Списаний', v.written_off),
+    fact('Примітка', v.note)
+  ].filter(Boolean));
+
+  const conds = [];
+  const safe = x => String(x).replace(/[,()"\\]/g, ' ');
+  if (v.fleet_no) conds.push('fleet_no.eq.' + safe(v.fleet_no));
+  if (v.plate_no) conds.push('plate_no.eq.' + safe(v.plate_no));
+  let list = [];
+  if (conds.length) {
+    const r = await db.from('photos').select('*').eq('city_id', v.city_id).eq('status', 'approved')
+      .or(conds.join(',')).order('created_at', { ascending: false }).limit(60);
+    list = r.data || [];
+    await enrichPhotos(list);
+  }
+  if ($('vehicleView').classList.contains('hidden')) return;
+  $('vhGrid').replaceChildren(...list.map(phCard));
+  $('vhEmpty').classList.toggle('hidden', list.length > 0);
+}
+
+/* --- карта --- */
+let leafletP = null;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve();
+  if (!leafletP) {
+    leafletP = new Promise((res, rej) => {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(css);
+      const sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js';
+      sc.onload = res;
+      sc.onerror = () => { leafletP = null; rej(new Error('leaflet')); };
+      document.head.appendChild(sc);
+    });
+  }
+  return leafletP;
+}
+let mapObj = null;
+let mapLayer = null;
+async function openMap() {
+  showPage('mapView', '#map');
+  setMsg($('mapMsg'), '');
+  try { await loadLeaflet(); } catch (e) { setMsg($('mapMsg'), 'Не вдалося завантажити карту'); return; }
+  if ($('mapView').classList.contains('hidden')) return;
+  if (!mapObj) {
+    mapObj = L.map('mapBox').setView([49, 31], 5);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(mapObj);
+    mapLayer = L.layerGroup().addTo(mapObj);
+  }
+  setTimeout(() => mapObj.invalidateSize(), 60);
+  mapLayer.clearLayers();
+  const pts = cities.filter(c => c.is_published && c.lat != null && c.lng != null);
+  if (!pts.length) setMsg($('mapMsg'), 'Поки жодному місту не вказано координати.');
+  pts.forEach(c => {
+    const box = document.createElement('div');
+    const b = document.createElement('b');
+    b.textContent = c.name;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn light';
+    btn.textContent = 'Відкрити';
+    btn.addEventListener('click', () => showCity(c.id));
+    box.append(b, document.createElement('br'), c.country || '', document.createElement('br'), btn);
+    L.marker([c.lat, c.lng]).addTo(mapLayer).bindPopup(box);
+  });
+  if (pts.length) mapObj.fitBounds(L.latLngBounds(pts.map(c => [c.lat, c.lng])), { padding: [40, 40], maxZoom: 9 });
+}
+$('openMap').addEventListener('click', openMap);
+
+$('cityGeo').addEventListener('click', async () => {
+  const q = [$('cityName').value, $('cityRegion').value, $('cityCountry').value].map(x => x.trim()).filter(Boolean).join(', ');
+  if (!q) { setMsg($('cityMsg'), 'Спершу вкажіть назву й країну'); return; }
+  $('cityGeo').disabled = true;
+  try {
+    const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(q), { headers: { 'Accept-Language': 'uk' } });
+    const j = await r.json();
+    if (!j.length) {
+      setMsg($('cityMsg'), 'Не знайдено, введіть координати вручну');
+    } else {
+      $('cityLat').value = Number(j[0].lat).toFixed(5);
+      $('cityLng').value = Number(j[0].lon).toFixed(5);
+      setMsg($('cityMsg'), 'Координати знайдено', true);
+    }
+  } catch (e) {
+    setMsg($('cityMsg'), 'Помилка пошуку координат');
+  }
+  $('cityGeo').disabled = false;
+});
+
+/* --- фото дня і популярне --- */
+async function loadGalleryTop() {
+  const since = new Date(Date.now() - 30 * 86400000).toISOString();
+  const { data, error } = await db.from('photos').select('*').eq('status', 'approved')
+    .gte('created_at', since).order('views', { ascending: false }).limit(10);
+  const list = error ? [] : data || [];
+  $('gTop').classList.toggle('hidden', !list.length);
+  if (!list.length) return;
+  await enrichPhotos(list);
+  const day = list[Math.floor(Date.now() / 86400000) % list.length];
+  $('gDay').replaceChildren(phCard(day));
+  $('gPop').replaceChildren(...list.filter(p => p !== day).slice(0, 4).map(phCard));
+}
+
+/* --- режим технічних робіт --- */
+async function checkMaintenance() {
+  const { data } = await db.from('site_settings').select('value').eq('key', 'maintenance').maybeSingle();
+  const v = data && data.value;
+  const on = !!(v && v.on) && !isPhotoMod();
+  $('maint').classList.toggle('hidden', !on);
+  if (on) $('maintText').textContent = v.message || 'Сайт тимчасово на технічних роботах. Спробуйте пізніше.';
+}
+$('maintLogin').addEventListener('click', () => { $('maint').classList.add('hidden'); openModal('login'); });
+
+/* --- PWA --- */
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 
 $('ppBack').addEventListener('click', closePhoto);
 
