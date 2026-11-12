@@ -3510,7 +3510,7 @@ async function render(session) {
   $('navName').textContent = data && data.username ? data.username : '';
   const role = data && data.role;
   me = { uid: session.user.id, role: role || null, name: data && data.username ? data.username : '', email: session.user.email || '' };
-  $('openRequests').classList.toggle('hidden', !isPhotoMod());
+  $('openRequests').classList.add('hidden'); // модерація тепер в окремій адмін-панелі
   $('openImport').classList.toggle('hidden', me.role !== 'owner');
   $('setAccount').classList.remove('hidden');
   loadNotifs();
