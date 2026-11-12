@@ -950,6 +950,25 @@ nav #navName { cursor: pointer; }
 .pf-title h2 { margin: 0; }
 .pf-meta { margin: 6px 0 0; opacity: .75; font-size: 14px; }
 .pf-actions { margin-top: 10px; }
+.pf-main { min-width: 0; }
+.pf-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.pf-bio { white-space: pre-wrap; margin: 0 0 18px; max-width: 720px; line-height: 1.5; }
+.pf-avatar.own { cursor: pointer; }
+.pf-stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 22px; }
+.pf-stat { padding: 10px 16px; border-radius: 12px; background: rgba(128,128,128,.15); min-width: 96px; text-align: center; }
+.pf-stat b { display: block; font-size: 20px; }
+.pf-stat span { font-size: 12px; opacity: .75; }
+.pf-ach { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 24px; }
+.ach { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border-radius: 999px; background: rgba(128,128,128,.18); font-size: 13px; }
+.ach.on { background: rgba(255,193,7,.25); }
+.ach.off { opacity: .38; filter: grayscale(1); }
+.pf-photos-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.pf-sort { padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(128,128,128,.4); background: transparent; color: inherit; }
+.set-sec { margin: 10px 0; border: 1px solid rgba(128,128,128,.3); border-radius: 10px; padding: 8px 12px; }
+.set-sec summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+.set-sec .btn { margin: 6px 6px 0 0; }
+.set-note { font-size: 13px; opacity: .8; margin: 8px 0; }
+#settingsView textarea { width: 100%; margin: 6px 0; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(128,128,128,.4); background: transparent; color: inherit; font: inherit; resize: vertical; box-sizing: border-box; }
 .pf-cities { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 24px; }
 .cv-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cv-photo {
@@ -2835,16 +2854,27 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
   <div class="cv-tabpane">
     <div class="pf-head">
       <img id="pfAvatar" class="pf-avatar" alt="">
-      <div>
+      <div class="pf-main">
         <div class="pf-title"><h2 id="pfName" class="cv-about-title"></h2><span id="pfBadge" class="badge hidden"></span></div>
         <p id="pfMeta" class="pf-meta"></p>
-        <div id="pfActions" class="pf-actions hidden"><button class="btn" id="pfSettings" type="button">⚙️ Налаштування акаунта</button></div>
+        <p id="pfInfo" class="pf-meta"></p>
+        <div id="pfActions" class="pf-actions">
+          <button class="btn hidden" id="pfSettings" type="button">⚙️ Налаштування акаунта</button>
+          <button class="btn" id="pfCopy" type="button">🔗 Скопіювати посилання</button>
+        </div>
       </div>
     </div>
+    <p id="pfBio" class="pf-bio hidden"></p>
+    <div id="pfStats" class="pf-stats"></div>
+    <h3 class="cv-about-title">Досягнення</h3>
+    <div id="pfAch" class="pf-ach"></div>
     <h3 class="cv-about-title">Міста</h3>
     <div id="pfCities" class="pf-cities"></div>
     <p id="pfCitiesEmpty" class="cv-empty hidden">Міст поки немає</p>
-    <h3 class="cv-about-title">Фото</h3>
+    <div class="pf-photos-head">
+      <h3 class="cv-about-title">Фото</h3>
+      <select id="pfSort" class="pf-sort"><option value="new">Нові</option><option value="views">Найпопулярніші</option></select>
+    </div>
     <div id="pfGrid" class="ph-grid"></div>
     <p id="pfEmpty" class="cv-empty hidden">Фото поки немає</p>
   </div>
@@ -3221,14 +3251,54 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
       <div id="setAccount" class="hidden">
         <div class="set-label">Акаунт</div>
         <button class="btn" id="setProfile" type="button">👤 Мій профіль</button>
-        <div class="set-label">Змінити нік</div>
-        <input id="setNick" type="text" placeholder="Новий нік (3–20, a-z, 0-9, _)" maxlength="20" autocomplete="off">
-        <button class="btn" id="setNickSave" type="button">Зберегти нік</button>
-        <div class="set-label">Змінити пароль</div>
-        <input id="setPassOld" type="password" placeholder="Поточний пароль" autocomplete="current-password">
-        <input id="setPassNew" type="password" placeholder="Новий пароль (8–64)" autocomplete="new-password" maxlength="64">
-        <button class="btn" id="setPassSave" type="button">Змінити пароль</button>
-        <p id="setMsg" class="msg"></p>
+
+        <details class="set-sec">
+          <summary>Про себе</summary>
+          <textarea id="setBio" maxlength="500" rows="4" placeholder="Розкажіть про себе (до 500 символів)"></textarea>
+          <input id="setLoc" type="text" maxlength="60" placeholder="Місто / країна" autocomplete="off">
+          <input id="setContacts" type="text" maxlength="120" placeholder="Контакти (Telegram, Instagram, сайт)" autocomplete="off">
+          <button class="btn" id="setBioSave" type="button">Зберегти профіль</button>
+          <button class="btn" id="setAvatarDel" type="button">Видалити аватар</button>
+          <p id="setMsgBio" class="msg"></p>
+        </details>
+
+        <details class="set-sec">
+          <summary>Нік і пароль</summary>
+          <div class="set-label">Змінити нік</div>
+          <input id="setNick" type="text" placeholder="Новий нік (3–20, a-z, 0-9, _)" maxlength="20" autocomplete="off">
+          <button class="btn" id="setNickSave" type="button">Зберегти нік</button>
+          <div class="set-label">Змінити пароль</div>
+          <input id="setPassOld" type="password" placeholder="Поточний пароль" autocomplete="current-password">
+          <input id="setPassNew" type="password" placeholder="Новий пароль (8–64)" autocomplete="new-password" maxlength="64">
+          <button class="btn" id="setPassSave" type="button">Змінити пароль</button>
+          <p id="setMsg" class="msg"></p>
+        </details>
+
+        <details class="set-sec">
+          <summary>Email і безпека</summary>
+          <p class="set-note"><span>Поточний email:</span> <b id="setEmailCur"></b></p>
+          <input id="setEmailNew" type="email" placeholder="Новий email" autocomplete="off">
+          <button class="btn" id="setEmailSend" type="button">Надіслати код</button>
+          <div id="setEmailCodeBox" class="hidden">
+            <input id="setEmailCode" type="text" inputmode="numeric" placeholder="Код з листа" autocomplete="one-time-code">
+            <button class="btn" id="setEmailConfirm" type="button">Підтвердити email</button>
+          </div>
+          <div>
+            <button class="btn" id="setSignOutOthers" type="button">Вийти на інших пристроях</button>
+            <button class="btn" id="setSignOutAll" type="button">Вийти з усіх пристроїв</button>
+          </div>
+          <p id="setMsgMail" class="msg"></p>
+        </details>
+
+        <details class="set-sec">
+          <summary>Мої дані та видалення акаунта</summary>
+          <button class="btn" id="setExport" type="button">Завантажити мої дані (JSON)</button>
+          <p class="set-note">Видалення незворотне: ваші фото, коментарі, голоси й сповіщення зникнуть. Чернетки міст буде видалено, а опубліковані міста залишаться на сайті під керуванням власника сайту.</p>
+          <input id="setDelPass" type="password" placeholder="Ваш пароль" autocomplete="current-password">
+          <input id="setDelNick" type="text" placeholder="Введіть свій нік для підтвердження" autocomplete="off">
+          <button class="btn danger" id="setDelete" type="button">Видалити акаунт назавжди</button>
+          <p id="setMsgData" class="msg"></p>
+        </details>
       </div>
       <button class="btn light" id="settingsClose" type="button">Закрити</button>
     </div>
@@ -3439,7 +3509,7 @@ async function render(session) {
   }
   $('navName').textContent = data && data.username ? data.username : '';
   const role = data && data.role;
-  me = { uid: session.user.id, role: role || null, name: data && data.username ? data.username : '' };
+  me = { uid: session.user.id, role: role || null, name: data && data.username ? data.username : '', email: session.user.email || '' };
   $('openRequests').classList.toggle('hidden', !isPhotoMod());
   $('openImport').classList.toggle('hidden', me.role !== 'owner');
   $('setAccount').classList.remove('hidden');
@@ -3453,6 +3523,7 @@ async function render(session) {
     badge.classList.add('hidden');
   }
   $('navAvatar').src = data && data.avatar_url ? data.avatar_url : placeholder;
+  if (!$('profileView').classList.contains('hidden') && location.hash === '#user=' + me.uid) $('pfAvatar').src = $('navAvatar').src;
   $('guest').classList.add('hidden');
   $('user').classList.remove('hidden');
   renderCity();
@@ -5221,6 +5292,69 @@ function applyAccountPrefs(p) {
 
 const DICT = Object.create(null);
 [
+  ['Досягнення', 'Достижения', 'Achievements'],
+  ['Перегляди', 'Просмотры', 'Views'],
+  ['Рейтинг', 'Рейтинг', 'Rating'],
+  ['Коментарі', 'Комментарии', 'Comments'],
+  ['Нові', 'Новые', 'Newest'],
+  ['Найпопулярніші', 'Самые популярные', 'Most popular'],
+  ['🔗 Скопіювати посилання', '🔗 Скопировать ссылку', '🔗 Copy link'],
+  ['✅ Скопійовано', '✅ Скопировано', '✅ Copied'],
+  ['Про себе', 'О себе', 'About me'],
+  ['Розкажіть про себе (до 500 символів)', 'Расскажите о себе (до 500 символов)', 'Tell about yourself (up to 500 characters)'],
+  ['Місто / країна', 'Город / страна', 'City / country'],
+  ['Контакти (Telegram, Instagram, сайт)', 'Контакты (Telegram, Instagram, сайт)', 'Contacts (Telegram, Instagram, website)'],
+  ['Зберегти профіль', 'Сохранить профиль', 'Save profile'],
+  ['Видалити аватар', 'Удалить аватар', 'Remove avatar'],
+  ['Профіль збережено', 'Профиль сохранён', 'Profile saved'],
+  ['Аватар видалено', 'Аватар удалён', 'Avatar removed'],
+  ['Нік і пароль', 'Ник и пароль', 'Nickname and password'],
+  ['Email і безпека', 'Email и безопасность', 'Email and security'],
+  ['Поточний email:', 'Текущий email:', 'Current email:'],
+  ['Новий email', 'Новый email', 'New email'],
+  ['Підтвердити email', 'Подтвердить email', 'Confirm email'],
+  ['Вийти на інших пристроях', 'Выйти на других устройствах', 'Sign out on other devices'],
+  ['Вийти з усіх пристроїв', 'Выйти на всех устройствах', 'Sign out on all devices'],
+  ['Введіть коректний email', 'Введите корректный email', 'Enter a valid email'],
+  ['Це ваш поточний email', 'Это ваш текущий email', 'This is your current email'],
+  ['Код надіслано на нову пошту', 'Код отправлен на новую почту', 'Code sent to the new email'],
+  ['Email змінено', 'Email изменён', 'Email changed'],
+  ['Ви вийшли на інших пристроях', 'Вы вышли на других устройствах', 'You were signed out on other devices'],
+  ['Мої дані та видалення акаунта', 'Мои данные и удаление аккаунта', 'My data and account deletion'],
+  ['Завантажити мої дані (JSON)', 'Скачать мои данные (JSON)', 'Download my data (JSON)'],
+  ['Видалення незворотне: ваші фото, коментарі, голоси й сповіщення зникнуть. Чернетки міст буде видалено, а опубліковані міста залишаться на сайті під керуванням власника сайту.', 'Удаление необратимо: ваши фото, комментарии, голоса и уведомления исчезнут. Черновики городов будут удалены, а опубликованные города останутся на сайте под управлением владельца сайта.', 'Deletion is irreversible: your photos, comments, votes and notifications will disappear. Draft cities will be deleted, and published cities will stay on the site under the site owner’s control.'],
+  ['Ваш пароль', 'Ваш пароль', 'Your password'],
+  ['Введіть свій нік для підтвердження', 'Введите свой ник для подтверждения', 'Enter your nickname to confirm'],
+  ['Видалити акаунт назавжди', 'Удалить аккаунт навсегда', 'Delete account permanently'],
+  ['Введіть пароль', 'Введите пароль', 'Enter your password'],
+  ['Перше фото', 'Первое фото', 'First photo'],
+  ['10 фото', '10 фото', '10 photos'],
+  ['50 фото', '50 фото', '50 photos'],
+  ['100 фото', '100 фото', '100 photos'],
+  ['1 000 переглядів', '1 000 просмотров', '1,000 views'],
+  ['10 000 переглядів', '10 000 просмотров', '10,000 views'],
+  ['Рейтинг +10', 'Рейтинг +10', 'Rating +10'],
+  ['Рейтинг +100', 'Рейтинг +100', 'Rating +100'],
+  ['Коментатор', 'Комментатор', 'Commenter'],
+  ['Автор міста', 'Автор города', 'City author'],
+  ['Містобудівник', 'Градостроитель', 'City builder'],
+  ['Локальний редактор', 'Локальный редактор', 'Local editor'],
+  ['Старожил', 'Старожил', 'Old-timer'],
+  ['Ветеран', 'Ветеран', 'Veteran'],
+  ['Схвалене перше фото', 'Одобренное первое фото', 'First approved photo'],
+  ['10 схвалених фото', '10 одобренных фото', '10 approved photos'],
+  ['50 схвалених фото', '50 одобренных фото', '50 approved photos'],
+  ['100 схвалених фото', '100 одобренных фото', '100 approved photos'],
+  ['Ваші фото набрали 1 000 переглядів', 'Ваши фото набрали 1 000 просмотров', 'Your photos reached 1,000 views'],
+  ['Ваші фото набрали 10 000 переглядів', 'Ваши фото набрали 10 000 просмотров', 'Your photos reached 10,000 views'],
+  ['Сумарний рейтинг фото +10', 'Суммарный рейтинг фото +10', 'Total photo rating +10'],
+  ['Сумарний рейтинг фото +100', 'Суммарный рейтинг фото +100', 'Total photo rating +100'],
+  ['Залишити 10 коментарів', 'Оставить 10 комментариев', 'Leave 10 comments'],
+  ['Опубліковане місто', 'Опубликованный город', 'A published city'],
+  ['5 опублікованих міст', '5 опубликованных городов', '5 published cities'],
+  ['Редактор опублікованого міста', 'Редактор опубликованного города', 'Editor of a published city'],
+  ['30 днів на сайті', '30 дней на сайте', '30 days on the site'],
+  ['Рік на сайті', 'Год на сайте', 'A year on the site'],
   ['Забули пароль?', 'Забыли пароль?', 'Forgot password?'],
   ['Відновлення пароля', 'Восстановление пароля', 'Password recovery'],
   ['Надіслати код', 'Отправить код', 'Send code'],
@@ -5842,6 +5976,7 @@ function drawAccounts() {
       const t = document.createElement('p');
       const b = document.createElement('b');
       b.textContent = a.username || '—';
+      linkUser(b, a.id);
       t.appendChild(b);
       if (a.role === 'owner' || a.role === 'admin' || a.role === 'photomod') {
         const tg = document.createElement('span');
@@ -8050,27 +8185,85 @@ function linkUser(el, uid) {
   return el;
 }
 
+const ACH = [
+  { ico: '📸', t: 'Перше фото', d: 'Схвалене перше фото', ok: s => s.photos >= 1 },
+  { ico: '📷', t: '10 фото', d: '10 схвалених фото', ok: s => s.photos >= 10 },
+  { ico: '🎞️', t: '50 фото', d: '50 схвалених фото', ok: s => s.photos >= 50 },
+  { ico: '🏆', t: '100 фото', d: '100 схвалених фото', ok: s => s.photos >= 100 },
+  { ico: '👀', t: '1 000 переглядів', d: 'Ваші фото набрали 1 000 переглядів', ok: s => s.views >= 1000 },
+  { ico: '🔥', t: '10 000 переглядів', d: 'Ваші фото набрали 10 000 переглядів', ok: s => s.views >= 10000 },
+  { ico: '⭐', t: 'Рейтинг +10', d: 'Сумарний рейтинг фото +10', ok: s => (s.likes || 0) - (s.dislikes || 0) >= 10 },
+  { ico: '🌟', t: 'Рейтинг +100', d: 'Сумарний рейтинг фото +100', ok: s => (s.likes || 0) - (s.dislikes || 0) >= 100 },
+  { ico: '💬', t: 'Коментатор', d: 'Залишити 10 коментарів', ok: s => (s.comments || 0) >= 10 },
+  { ico: '🏙️', t: 'Автор міста', d: 'Опубліковане місто', ok: s => s.cities >= 1 },
+  { ico: '🌆', t: 'Містобудівник', d: '5 опублікованих міст', ok: s => s.cities >= 5 },
+  { ico: '✏️', t: 'Локальний редактор', d: 'Редактор опублікованого міста', ok: s => (s.editor_cities || 0) >= 1 },
+  { ico: '🕰️', t: 'Старожил', d: '30 днів на сайті', ok: s => s.days >= 30 },
+  { ico: '🎖️', t: 'Ветеран', d: 'Рік на сайті', ok: s => s.days >= 365 }
+];
+let pfPhotos = [];
+
+function linkify(text) {
+  const frag = document.createDocumentFragment();
+  String(text || '').split(/(https?:\/\/[^\s]+)/g).forEach(part => {
+    if (!part) return;
+    if (/^https?:\/\//.test(part)) {
+      const a = document.createElement('a');
+      a.href = part;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer nofollow';
+      a.textContent = part;
+      frag.appendChild(a);
+    } else {
+      frag.appendChild(document.createTextNode(part));
+    }
+  });
+  return frag;
+}
+
+function renderPfGrid() {
+  const list = pfPhotos.slice();
+  if ($('pfSort').value === 'views') list.sort((a, b) => (b.views || 0) - (a.views || 0));
+  $('pfGrid').replaceChildren(...list.map(phCard));
+  $('pfEmpty').classList.toggle('hidden', list.length > 0);
+}
+
 async function openProfile(uid) {
   if (!uid) return;
   showPage('profileView', '#user=' + uid);
   const mk = (tag, txt) => { const e = document.createElement(tag); e.textContent = txt; return e; };
+  const num = n => Number(n || 0).toLocaleString('uk-UA');
+  pfPhotos = [];
   $('pfName').textContent = '…';
   $('pfBadge').classList.add('hidden');
   $('pfMeta').replaceChildren();
+  $('pfInfo').replaceChildren();
+  $('pfBio').classList.add('hidden');
+  $('pfStats').replaceChildren();
+  $('pfAch').replaceChildren();
   $('pfGrid').replaceChildren();
   $('pfCities').replaceChildren();
   $('pfEmpty').classList.add('hidden');
   $('pfCitiesEmpty').classList.add('hidden');
-  $('pfActions').classList.add('hidden');
+  $('pfSettings').classList.add('hidden');
+  $('pfAvatar').classList.remove('own');
   $('pfAvatar').src = placeholder;
-  const { data: p } = await db.from('profiles').select('id, username, role, avatar_url, created_at').eq('id', uid).maybeSingle();
+
+  let { data: p, error: pe } = await db.from('profiles')
+    .select('id, username, role, avatar_url, created_at, bio, location, contacts').eq('id', uid).maybeSingle();
+  if (pe) {
+    ({ data: p } = await db.from('profiles').select('id, username, role, avatar_url, created_at').eq('id', uid).maybeSingle());
+  }
   if ($('profileView').classList.contains('hidden')) return;
   if (!p) {
     $('pfName').textContent = 'Користувача не знайдено';
     return;
   }
+  const own = uid === me.uid;
   $('pfName').textContent = p.username || '—';
   $('pfAvatar').src = p.avatar_url || placeholder;
+  $('pfAvatar').classList.toggle('own', own);
+  $('pfSettings').classList.toggle('hidden', !own);
   const bd = $('pfBadge');
   bd.className = 'badge';
   if (['owner', 'admin', 'photomod'].includes(p.role)) {
@@ -8079,7 +8272,20 @@ async function openProfile(uid) {
   } else {
     bd.classList.add('hidden');
   }
-  $('pfActions').classList.toggle('hidden', uid !== me.uid);
+  const days = (Date.now() - new Date(p.created_at).getTime()) / 86400000;
+  $('pfMeta').replaceChildren(mk('span', 'На сайті з'), ' ', mk('b', new Date(p.created_at).toLocaleDateString('uk-UA')));
+  if (p.bio) {
+    $('pfBio').textContent = p.bio;
+    $('pfBio').classList.remove('hidden');
+  }
+  const info = [];
+  if (p.location) info.push(mk('span', '📍 ' + p.location));
+  if (p.contacts) {
+    const sp = document.createElement('span');
+    sp.append('✉️ ', linkify(p.contacts));
+    info.push(sp);
+  }
+  info.forEach((n, i) => { if (i) $('pfInfo').append(' · '); $('pfInfo').append(n); });
 
   const mine = cities
     .filter(c => c.owner_id === uid)
@@ -8099,18 +8305,65 @@ async function openProfile(uid) {
   const list = error ? [] : ph || [];
   await enrichPhotos(list);
   if ($('profileView').classList.contains('hidden')) return;
-  $('pfGrid').replaceChildren(...list.map(phCard));
-  $('pfEmpty').classList.toggle('hidden', list.length > 0);
-  $('pfMeta').replaceChildren(
-    mk('span', 'На сайті з'), ' ', mk('b', new Date(p.created_at).toLocaleDateString('uk-UA')),
-    ' · ', mk('span', 'Фото:'), ' ', mk('b', String(list.length)),
-    ' · ', mk('span', 'Міста:'), ' ', mk('b', String(mine.length))
-  );
+  pfPhotos = list;
+  renderPfGrid();
+
+  let st = null;
+  const r = await db.rpc('profile_stats', { p_uid: uid });
+  if (!r.error && r.data) st = r.data;
+  if (!st) {
+    const ok = list.filter(x => x.status === 'approved');
+    st = {
+      photos: ok.length,
+      views: ok.reduce((a, x) => a + (x.views || 0), 0),
+      likes: null, dislikes: null, comments: null,
+      cities: mine.filter(c => c.is_published).length,
+      editor_cities: 0
+    };
+  }
+  st.days = days;
+  if ($('profileView').classList.contains('hidden')) return;
+  const rating = st.likes == null ? '—' : ((st.likes - st.dislikes) > 0 ? '+' : '') + num(st.likes - st.dislikes);
+  const cards = [
+    ['Фото', num(st.photos)], ['Перегляди', num(st.views)], ['Рейтинг', rating],
+    ['Коментарі', st.comments == null ? '—' : num(st.comments)], ['Міста', num(st.cities)]
+  ];
+  $('pfStats').replaceChildren(...cards.map(([label, val]) => {
+    const d = document.createElement('div');
+    d.className = 'pf-stat';
+    d.append(mk('b', val), mk('span', label));
+    return d;
+  }));
+  $('pfAch').replaceChildren(...ACH.map(a => {
+    const el = document.createElement('span');
+    el.className = 'ach ' + (a.ok(st) ? 'on' : 'off');
+    el.title = a.d;
+    el.append(a.ico, ' ', mk('span', a.t));
+    return el;
+  }));
 }
 
+$('pfSort').addEventListener('change', renderPfGrid);
+$('pfCopy').addEventListener('click', async () => {
+  const m = location.hash.match(/^#user=(.+)$/);
+  const url = location.origin + location.pathname + '#user=' + (m ? m[1] : me.uid);
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch (e) {
+    prompt('Скопіюйте посилання:', url);
+    return;
+  }
+  const old = $('pfCopy').textContent;
+  $('pfCopy').textContent = '✅ Скопійовано';
+  setTimeout(() => { $('pfCopy').textContent = old; }, 1500);
+});
+$('pfAvatar').addEventListener('click', () => {
+  if (me.uid && location.hash === '#user=' + me.uid) $('avatarChange').click();
+});
+
 $('navName').addEventListener('click', () => { if (me.uid) openProfile(me.uid); });
-$('pfSettings').addEventListener('click', () => { setMsg($('setMsg'), ''); openModal('settings'); });
-$('openSettings').addEventListener('click', () => setMsg($('setMsg'), ''));
+$('pfSettings').addEventListener('click', () => { openModal('settings'); fillAccountForm(); });
+$('openSettings').addEventListener('click', () => fillAccountForm());
 $('setProfile').addEventListener('click', () => { closeModal(); if (me.uid) openProfile(me.uid); });
 
 $('setNickSave').addEventListener('click', async () => {
@@ -8151,6 +8404,135 @@ $('setPassSave').addEventListener('click', async () => {
   $('setPassOld').value = '';
   $('setPassNew').value = '';
   setMsg($('setMsg'), 'Пароль змінено', true);
+});
+
+/* --- акаунт: профіль, email, безпека, дані --- */
+async function fillAccountForm() {
+  ['setMsg', 'setMsgBio', 'setMsgMail', 'setMsgData'].forEach(id => setMsg($(id), ''));
+  if (!me.uid) return;
+  $('setEmailCur').textContent = me.email || '';
+  $('setEmailCodeBox').classList.add('hidden');
+  const { data } = await db.from('profiles').select('bio, location, contacts').eq('id', me.uid).maybeSingle();
+  $('setBio').value = (data && data.bio) || '';
+  $('setLoc').value = (data && data.location) || '';
+  $('setContacts').value = (data && data.contacts) || '';
+}
+
+$('setBioSave').addEventListener('click', async () => {
+  $('setBioSave').disabled = true;
+  const { error } = await db.rpc('update_profile', {
+    p_bio: $('setBio').value, p_location: $('setLoc').value, p_contacts: $('setContacts').value
+  });
+  $('setBioSave').disabled = false;
+  if (error) { setMsg($('setMsgBio'), error.message); return; }
+  setMsg($('setMsgBio'), 'Профіль збережено', true);
+  if (location.hash === '#user=' + me.uid) openProfile(me.uid);
+});
+
+$('setAvatarDel').addEventListener('click', async () => {
+  if (!confirm('Видалити аватар?')) return;
+  const { error } = await db.from('profiles').update({ avatar_url: null }).eq('id', me.uid);
+  if (error) { setMsg($('setMsgBio'), error.message); return; }
+  await db.storage.from('avatars').remove([me.uid + '/avatar']);
+  $('navAvatar').src = placeholder;
+  if (location.hash === '#user=' + me.uid) $('pfAvatar').src = placeholder;
+  setMsg($('setMsgBio'), 'Аватар видалено', true);
+});
+
+let newEmail = '';
+$('setEmailSend').addEventListener('click', async () => {
+  const em = $('setEmailNew').value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { setMsg($('setMsgMail'), 'Введіть коректний email'); return; }
+  if (em === String(me.email || '').toLowerCase()) { setMsg($('setMsgMail'), 'Це ваш поточний email'); return; }
+  $('setEmailSend').disabled = true;
+  const { error } = await db.auth.updateUser({ email: em });
+  $('setEmailSend').disabled = false;
+  if (error) { setMsg($('setMsgMail'), /rate limit|seconds/i.test(error.message) ? 'Забагато листів, спробуй пізніше' : error.message); return; }
+  newEmail = em;
+  $('setEmailCodeBox').classList.remove('hidden');
+  setMsg($('setMsgMail'), 'Код надіслано на нову пошту', true);
+});
+
+$('setEmailConfirm').addEventListener('click', async () => {
+  const token = $('setEmailCode').value.trim();
+  if (!token || !newEmail) return;
+  $('setEmailConfirm').disabled = true;
+  const { error } = await db.auth.verifyOtp({ email: newEmail, token, type: 'email_change' });
+  $('setEmailConfirm').disabled = false;
+  if (error) { setMsg($('setMsgMail'), /expired|invalid/i.test(error.message) ? 'Невірний або прострочений код' : error.message); return; }
+  await db.auth.refreshSession();
+  const { data } = await db.auth.getSession();
+  me.email = (data.session && data.session.user.email) || newEmail;
+  $('setEmailCur').textContent = me.email;
+  $('setEmailNew').value = '';
+  $('setEmailCode').value = '';
+  $('setEmailCodeBox').classList.add('hidden');
+  newEmail = '';
+  setMsg($('setMsgMail'), 'Email змінено', true);
+});
+
+$('setSignOutOthers').addEventListener('click', async () => {
+  const { error } = await db.auth.signOut({ scope: 'others' });
+  setMsg($('setMsgMail'), error ? error.message : 'Ви вийшли на інших пристроях', !error);
+});
+
+$('setSignOutAll').addEventListener('click', async () => {
+  if (!confirm('Вийти з акаунта на всіх пристроях, включно з цим?')) return;
+  await db.auth.signOut({ scope: 'global' });
+  closeModal();
+});
+
+$('setExport').addEventListener('click', async () => {
+  if (!me.uid) return;
+  $('setExport').disabled = true;
+  const uid = me.uid;
+  const [pr, ph, cm, ct, vt] = await Promise.all([
+    db.from('profiles').select('*').eq('id', uid).maybeSingle(),
+    db.from('photos').select('*').eq('owner_id', uid),
+    db.from('photo_comments').select('*').eq('owner_id', uid),
+    db.from('cities').select('*').eq('owner_id', uid),
+    db.from('photo_votes').select('*').eq('user_id', uid)
+  ]);
+  const out = {
+    exported_at: new Date().toISOString(), email: me.email, profile: pr.data,
+    photos: ph.data || [], comments: cm.data || [], cities: ct.data || [], votes: vt.data || []
+  };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' }));
+  a.download = 'my-data.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  $('setExport').disabled = false;
+});
+
+$('setDelete').addEventListener('click', async () => {
+  const uid = me.uid;
+  const pass = $('setDelPass').value;
+  if ($('setDelNick').value.trim() !== me.name) { setMsg($('setMsgData'), 'Введіть свій нік для підтвердження'); return; }
+  if (!pass) { setMsg($('setMsgData'), 'Введіть пароль'); return; }
+  if (!confirm('Видалити акаунт назавжди? Це не можна скасувати.')) return;
+  $('setDelete').disabled = true;
+  const { data: mine } = await db.from('photos').select('path').eq('owner_id', uid);
+  const paths = (mine || []).map(x => x.path).filter(Boolean);
+  const { error } = await db.rpc('delete_my_account', { p_password: pass });
+  if (error) {
+    $('setDelete').disabled = false;
+    setMsg($('setMsgData'), error.message);
+    return;
+  }
+  for (let i = 0; i < paths.length; i += 100) {
+    try { await db.storage.from('photos').remove(paths.slice(i, i + 100)); } catch (e) { /* файли можна прибрати пізніше */ }
+  }
+  try { await db.storage.from('avatars').remove([uid + '/avatar']); } catch (e) { /* ignore */ }
+  try { await db.auth.signOut({ scope: 'local' }); } catch (e) { /* ignore */ }
+  $('setDelete').disabled = false;
+  $('setDelPass').value = '';
+  $('setDelNick').value = '';
+  closeModal();
+  location.hash = '';
+  alert('Акаунт видалено');
 });
 
 /* --- відновлення пароля (код з листа) --- */
