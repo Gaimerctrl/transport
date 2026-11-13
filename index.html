@@ -2792,6 +2792,22 @@ input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
 .hist-row small { opacity: .7; display: block; }
 .hist-chg { display: inline-block; margin: 2px 6px 0 0; padding: 1px 8px; border-radius: 8px; background: rgba(128, 128, 128, .2); font-size: 13px; }
 .hist-chg s { opacity: .6; }
+
+/* --- система балів --- */
+.pf-points { border: 1px solid rgba(128, 128, 128, .35); border-radius: 14px; padding: 14px 16px; margin: 14px 0; }
+.pf-points .top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pf-points .ic { font-size: 34px; line-height: 1; }
+.pf-points .lv { font-size: 18px; font-weight: 800; }
+.pf-points .pt { margin-left: auto; text-align: right; font-size: 13px; opacity: .85; }
+.pf-points .pt b { font-size: 26px; display: block; opacity: 1; }
+.pf-points .bar { height: 9px; border-radius: 6px; background: rgba(128, 128, 128, .25); overflow: hidden; margin: 10px 0 4px; }
+.pf-points .bar i { display: block; height: 100%; background: linear-gradient(90deg, #3f6ad8, #3fa66b); border-radius: 6px; }
+.pf-points .nx { font-size: 13px; opacity: .8; }
+.pf-points .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.pf-points .chips span { border: 1px solid rgba(128, 128, 128, .4); border-radius: 999px; padding: 3px 10px; font-size: 13px; }
+.lvl { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: rgba(63, 106, 216, .18); margin-left: 6px; vertical-align: middle; white-space: nowrap; }
+.up-first { margin-top: 8px; padding: 8px 12px; border-radius: 10px; background: rgba(63, 166, 107, .18); border: 1px solid rgba(63, 166, 107, .5); font-size: 14px; }
+.wn-row .pts { font-size: 12px; font-weight: 800; color: #3fa66b; border: 1px solid #3fa66b; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -3081,7 +3097,7 @@ input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
     <h2 class="cv-about-title">🏆 Рейтинг фотографів</h2>
     <div class="wn-bar">
       <div class="seg" id="topPeriod"><button type="button" data-p="all" class="on">Весь час</button><button type="button" data-p="30">30 днів</button><button type="button" data-p="7">7 днів</button></div>
-      <div class="seg" id="topMetric"><button type="button" data-m="photos" class="on">За фото</button><button type="button" data-m="views">За переглядами</button></div>
+      <div class="seg" id="topMetric"><button type="button" data-m="points" class="on">🏅 За балами</button><button type="button" data-m="photos">За фото</button><button type="button" data-m="views">За переглядами</button></div>
     </div>
     <p id="topMsg" class="msg"></p>
     <div id="topList"></div>
@@ -3127,6 +3143,7 @@ input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
       </div>
     </div>
     <p id="pfBio" class="pf-bio hidden"></p>
+    <div id="pfPoints" class="pf-points hidden"></div>
     <div id="pfStats" class="pf-stats"></div>
     <h3 class="cv-about-title">Досягнення</h3>
     <div id="pfAch" class="pf-ach"></div>
@@ -3211,6 +3228,7 @@ input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
           <div class="up-sug hidden" id="phFleetSug"></div>
         </div>
         <div class="up-vsel hidden" id="phVehCard"></div>
+          <div id="phFirstHint" class="up-first hidden"></div>
         <div class="up-f">
           <label class="up-inl" style="max-width:220px"><span>Маршрут №</span><input id="phRoute" type="text" maxlength="20" autocomplete="off"></label>
           <div class="up-sug hidden" id="phRouteSug"></div>
@@ -7719,6 +7737,7 @@ function phShowVeh() {
   field.classList.toggle('hidden', !!v);
   if (!v) {
     card.replaceChildren();
+    $('phFirstHint').classList.add('hidden');
     return;
   }
   const city = cities.find(c => c.id === phCityId);
@@ -7758,6 +7777,7 @@ DICT['Прибрати прив’язку ТЗ'] = { ru: 'Убрать прив
 function phPickVeh(v) {
   const pe = phEnts.find(e => e.id === v.enterprise_id);
   phVehSel = { ...v, ent_name: pe ? pe.name : '' };
+  phFirstHintCheck(v);
   $('phFleet').value = v.fleet_no;
   phEntId = v.enterprise_id;
   phTypeKey = v.vehicle_type || null;
@@ -9218,6 +9238,7 @@ async function openProfile(uid) {
   } else {
     bd.classList.add('hidden');
   }
+  loadPointsCard(uid);
   const days = (Date.now() - new Date(p.created_at).getTime()) / 86400000;
   $('pfMeta').replaceChildren(mk('span', 'На сайті з'), ' ', mk('b', new Date(p.created_at).toLocaleDateString('uk-UA')));
   if (p.bio) {
@@ -9869,6 +9890,7 @@ async function renderVehiclePage(id) {
   $('vhGrid').replaceChildren(...list.map(phCard));
   $('vhEmpty').classList.toggle('hidden', list.length > 0);
   $('vhPhotosTitle').textContent = 'Фото' + (list.length ? ' (' + list.length + ')' : '');
+  getPointsRules().then(r => { if (vpCur && vpCur.id === v.id) $('vpAddPhoto').textContent = '📷 Додати фото цього ТЗ' + (r && !list.length ? ' · ' + firstBonusText(r) + ' балів' : ''); });
 }
 
 /* --- карта --- */
@@ -10156,7 +10178,7 @@ NOFILL.forEach(id => {
   inp.addEventListener('pointerdown', unlock);
   inp.addEventListener('touchstart', unlock, { passive: true });
   inp.addEventListener('focus', () => { unlock(); cleanFill(inp); });
-  inp.addEventListener('blur', () => { cleanFill(inp); if (!inp.value) inp.setAttribute('readonly', ''); });
+  inp.addEventListener('blur', () => cleanFill(inp));
   inp.addEventListener('change', () => cleanFill(inp));
 });
 /* Chrome підставляє значення з затримкою й без події: ловимо через CSS-анімацію та регулярну перевірку */
@@ -10466,6 +10488,8 @@ async function loadWanted() {
   $('wnSummary').classList.remove('hidden');
   if (!missing.length) { setMsg($('wnMsg'), '🎉 Усі машини за цими умовами вже є на фото'); return; }
   const names = Object.fromEntries(es.map(e => [e.id, e.name]));
+  const rulesW = await getPointsRules();
+  if (tok !== wnTok) return;
   const groups = {};
   missing.forEach(v => { (groups[v.enterprise_id] = groups[v.enterprise_id] || []).push(v); });
   const keys = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
@@ -10488,6 +10512,7 @@ async function loadWanted() {
       open.addEventListener('click', () => openVehicle(v.id));
       const add = Object.assign(document.createElement('button'), { type: 'button', className: 'btn dark', textContent: '📷 Додати фото' });
       add.addEventListener('click', () => openPhotoFormForVehicle(v));
+      if (rulesW) row.append(Object.assign(document.createElement('span'), { className: 'pts', textContent: firstBonusText(rulesW) + ' балів', title: 'За перше фото цієї машини' }));
       row.append(open, add);
       nodes.push(row);
     }
@@ -10502,7 +10527,7 @@ async function loadWanted() {
 
 /* --- Рейтинг фотографів --- */
 let topPeriod = 'all';
-let topMetric = 'photos';
+let topMetric = 'points';
 function openTop() {
   showPage('topView', '#top');
   loadTop();
@@ -10512,6 +10537,7 @@ async function loadTop() {
   document.querySelectorAll('#topMetric button').forEach(b => b.classList.toggle('on', b.dataset.m === topMetric));
   setMsg($('topMsg'), 'Завантаження…');
   $('topList').replaceChildren();
+  if (topMetric === 'points') { await loadTopPoints(); return; }
   let rows;
   try {
     rows = await fetchAll('photos', 'owner_id, owner_name, views, created_at', q => {
@@ -10556,6 +10582,88 @@ async function openRandomPhoto() {
   if (data && data[0]) openPhotoById(data[0].id); else flash('Не вдалося обрати фото');
 }
 
+
+
+/* ======================= СИСТЕМА БАЛІВ ======================= */
+const LEVELS = [[0, '🌱', 'Новачок'], [50, '📷', 'Любитель'], [150, '🎞️', 'Фотограф'], [400, '🏅', 'Досвідчений'], [800, '🏆', 'Майстер'], [1500, '💎', 'Експерт'], [3000, '👑', 'Легенда']];
+function levelOf(pts) {
+  const p = Number(pts) || 0;
+  let i = 0;
+  LEVELS.forEach((l, k) => { if (p >= l[0]) i = k; });
+  const cur = LEVELS[i]; const nxt = LEVELS[i + 1];
+  return { icon: cur[1], name: cur[2], from: cur[0], next: nxt ? nxt[0] : null, nextName: nxt ? nxt[2] : null, pct: nxt ? Math.max(2, Math.round(((p - cur[0]) / (nxt[0] - cur[0])) * 100)) : 100 };
+}
+const fmtPts = n => (Math.round(Number(n || 0) * 10) / 10).toLocaleString('uk-UA');
+let pointsRulesP = null;
+function getPointsRules() {
+  if (!pointsRulesP) {
+    pointsRulesP = db.from('points_rules').select('*').then(r => {
+      if (r.error || !(r.data || []).length) return null;
+      const m = {};
+      r.data.forEach(x => { m[x.key] = { points: Number(x.points), cap: x.cap == null ? null : Number(x.cap), label: x.label }; });
+      return ['photo', 'first'].every(k => m[k]) ? m : null;
+    }).catch(() => null);
+  }
+  return pointsRulesP;
+}
+const firstBonusText = r => '+' + fmtPts(r.photo.points + r.first.points);
+
+async function loadPointsCard(uid) {
+  const box = $('pfPoints');
+  box.classList.add('hidden');
+  let res;
+  try { res = await db.rpc('points_board', { p_days: null, p_limit: 1, p_user: uid }); } catch (e) { return; }
+  if (res.error || $('profileView').classList.contains('hidden')) return;
+  const row = (res.data || [])[0] || { points: 0, rank: null, photos: 0, firsts: 0, votes: 0, favs: 0, comments: 0, views: 0, pts_photo: 0, pts_first: 0, pts_vote: 0, pts_fav: 0, pts_comment: 0, pts_views: 0 };
+  const lv = levelOf(row.points);
+  const mk = (cls, txt) => { const e = document.createElement('div'); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const top = mk('top');
+  top.append(mk('ic', lv.icon), (() => { const d = mk(); d.append(mk('lv', 'Рівень «' + lv.name + '»'), mk('nx', row.rank ? '#' + row.rank + ' у рейтингу' : 'ще не в рейтингу')); return d; })(),
+    (() => { const d = mk('pt'); const b = document.createElement('b'); b.textContent = fmtPts(row.points); d.append(b, 'балів'); return d; })());
+  const bar = mk('bar'); const fill = document.createElement('i'); fill.style.width = lv.pct + '%'; bar.appendChild(fill);
+  const nx = mk('nx', lv.next != null ? 'Ще ' + fmtPts(lv.next - row.points) + ' до рівня «' + lv.nextName + '»' : 'Найвищий рівень');
+  const chips = mk('chips');
+  [['📷', 'Фото', row.photos, row.pts_photo], ['🎯', 'Перші фото машин', row.firsts, row.pts_first], ['👍', 'Вподобання', row.votes, row.pts_vote],
+    ['⭐', 'В обраному', row.favs, row.pts_fav], ['💬', 'Коментарі', row.comments, row.pts_comment], ['👁', 'Перегляди', row.views, row.pts_views]]
+    .filter(x => Number(x[2]) > 0).forEach(([i, l, n, p]) => { const sp = document.createElement('span'); sp.textContent = i + ' ' + l + ': ' + Number(n).toLocaleString('uk-UA') + ' → +' + fmtPts(p); chips.appendChild(sp); });
+  box.replaceChildren(top, bar, nx, chips);
+  box.classList.remove('hidden');
+}
+
+async function loadTopPoints() {
+  const days = topPeriod === 'all' ? null : Number(topPeriod);
+  const { data, error } = await db.rpc('points_board', { p_days: days, p_limit: 50 });
+  if (error) { topMetric = 'photos'; loadTop(); return; }
+  if (!(data || []).length) { setMsg($('topMsg'), 'За цей період балів ще ніхто не набрав'); return; }
+  setMsg($('topMsg'), '');
+  const table = document.createElement('table'); table.className = 'lb-table';
+  const hr = table.createTHead().insertRow();
+  ['#', 'Автор', 'Бали', 'Фото', 'Перші фото'].forEach((t, i) => { const th = document.createElement('th'); th.textContent = t; if (i >= 2) th.style.textAlign = 'right'; hr.appendChild(th); });
+  const tb = table.createTBody();
+  data.forEach((a, i) => {
+    const tr = tb.insertRow();
+    const pl = tr.insertCell(); pl.className = 'pl'; pl.textContent = ['🥇', '🥈', '🥉'][i] || a.rank;
+    const nm = tr.insertCell();
+    const link = document.createElement('a'); link.textContent = a.username || 'Автор'; link.addEventListener('click', () => openProfile(a.user_id));
+    const lv = levelOf(a.points); const tag = document.createElement('span'); tag.className = 'lvl'; tag.textContent = lv.icon + ' ' + lv.name;
+    nm.append(link, tag);
+    const c1 = tr.insertCell(); c1.className = 'num'; c1.innerHTML = ''; const b = document.createElement('b'); b.textContent = fmtPts(a.points); c1.appendChild(b);
+    const c2 = tr.insertCell(); c2.className = 'num'; c2.textContent = a.photos;
+    const c3 = tr.insertCell(); c3.className = 'num'; c3.textContent = a.firsts;
+  });
+  $('topList').replaceChildren(table);
+}
+
+async function phFirstHintCheck(v) {
+  const box = $('phFirstHint');
+  box.classList.add('hidden');
+  const rules = await getPointsRules();
+  if (!rules || !v || !v.enterprise_id) return;
+  const { count, error } = await db.from('photos').select('id', { count: 'exact', head: true }).eq('status', 'approved').eq('enterprise_id', v.enterprise_id).eq('fleet_no', v.fleet_no);
+  if (error || !phVehSel || phVehSel.fleet_no !== v.fleet_no) return;
+  box.textContent = count ? '+' + fmtPts(rules.photo.points) + ' балів після схвалення фото' : '🎯 Для цієї машини ще немає фото! Перше фото принесе ' + firstBonusText(rules) + ' балів (з бонусом +' + fmtPts(rules.first.points) + ')';
+  box.classList.remove('hidden');
+}
 
 /* ======================= РОЗШИРЕНИЙ ПОШУК ======================= */
 const FD_SORTS = [['fleet', 'За бортовим номером'], ['model', 'За моделлю'], ['year_desc', 'Рік: новіші спочатку'], ['year_asc', 'Рік: старіші спочатку'], ['new', 'Нещодавно додані']];
