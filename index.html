@@ -10626,6 +10626,7 @@ async function loadPointsCard(uid) {
   [['📷', 'Фото', row.photos, row.pts_photo], ['🎯', 'Перші фото машин', row.firsts, row.pts_first], ['👍', 'Вподобання', row.votes, row.pts_vote],
     ['⭐', 'В обраному', row.favs, row.pts_fav], ['💬', 'Коментарі', row.comments, row.pts_comment], ['👁', 'Перегляди', row.views, row.pts_views]]
     .filter(x => Number(x[2]) > 0).forEach(([i, l, n, p]) => { const sp = document.createElement('span'); sp.textContent = i + ' ' + l + ': ' + Number(n).toLocaleString('uk-UA') + ' → +' + fmtPts(p); chips.appendChild(sp); });
+  if (Number(row.pts_bonus)) { const sp = document.createElement('span'); sp.textContent = '🎁 Бонус від адміністрації: ' + (row.pts_bonus > 0 ? '+' : '') + fmtPts(row.pts_bonus); chips.appendChild(sp); }
   box.replaceChildren(top, bar, nx, chips);
   box.classList.remove('hidden');
 }
