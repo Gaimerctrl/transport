@@ -2692,6 +2692,77 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
 .cm-item { padding: 14px 16px; }
 .pp-vote.blocked .pp-vbtn { opacity: .35; cursor: not-allowed; }
 .pp-vote.blocked .pp-vbtn:hover { background: none; }
+
+/* --- охоплення фото, сітка парку --- */
+.veh-tools { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.seg { display: inline-flex; border: 1px solid var(--line, #3a3a3a); border-radius: 10px; overflow: hidden; }
+.seg button { border: none; background: transparent; color: inherit; padding: 8px 14px; cursor: pointer; font: inherit; font-size: 14px; }
+.seg button.on { background: #3f6ad8; color: #fff; }
+.veh-chk { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
+.veh-cover { margin-top: 10px; font-size: 14px; display: grid; gap: 6px; max-width: 520px; }
+.veh-cover .bar { height: 8px; border-radius: 6px; background: rgba(128, 128, 128, .25); overflow: hidden; }
+.veh-cover .bar i { display: block; height: 100%; background: #3fa66b; border-radius: 6px; }
+.veh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(66px, 1fr)); gap: 6px; margin-bottom: 14px; }
+.vt { position: relative; border: 2px solid var(--c, #8f8f8f); background: color-mix(in srgb, var(--c, #8f8f8f) 22%, transparent); color: inherit; border-radius: 10px; padding: 9px 4px 7px; cursor: pointer; font: inherit; text-align: center; line-height: 1.15; }
+.vt:hover { filter: brightness(1.15); }
+.vt b { display: block; font-size: 16px; }
+.vt small { display: block; font-size: 10px; opacity: .75; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vt.nophoto { border-style: dashed; }
+.vt .cam { position: absolute; top: -7px; right: -5px; background: #3fa66b; color: #fff; border-radius: 9px; font-size: 10px; font-weight: 700; padding: 1px 5px; }
+.vh-photos-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.vh-photos-head .cv-about-title { margin: 0; }
+@media (max-width: 560px) { .veh-grid { grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); } .veh-tools { gap: 10px; } }
+
+/* --- статистика парку, пропуски, нові сторінки --- */
+.veh-stats { margin-top: 12px; border: 1px solid rgba(128, 128, 128, .35); border-radius: 12px; padding: 8px 14px; }
+.veh-stats summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px 24px; padding: 10px 0 6px; }
+.stat-grid h4 { margin: 0 0 8px; font-size: 14px; opacity: .8; }
+.brow { display: grid; grid-template-columns: 1fr 34px; gap: 2px 8px; align-items: center; font-size: 13px; margin-bottom: 6px; }
+.brow .lb { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; grid-column: 1 / 2; }
+.brow .nm { text-align: right; font-weight: 700; grid-column: 2 / 3; grid-row: 1 / 3; align-self: center; }
+.brow .tr { height: 7px; border-radius: 5px; background: rgba(128, 128, 128, .25); overflow: hidden; grid-column: 1 / 2; }
+.brow .tr i { display: block; height: 100%; border-radius: 5px; background: #3f6ad8; }
+.issue-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.issue-btn { border: 1px solid rgba(128, 128, 128, .5); background: transparent; color: inherit; border-radius: 999px; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 13px; }
+.issue-btn b { margin-left: 4px; }
+.issue-btn.ok { opacity: .55; cursor: default; }
+.issue-btn.bad { border-color: #d4853f; }
+.veh-issue { margin-top: 10px; display: flex; gap: 10px; align-items: center; font-size: 14px; flex-wrap: wrap; }
+.vt.ghost { border: 2px dashed rgba(128, 128, 128, .5); background: transparent; opacity: .55; }
+.vt.ghost small { font-style: italic; }
+.vt.ghost:disabled { cursor: default; }
+.veh-gaps { font-size: 13px; opacity: .85; margin: -6px 0 14px; }
+.vh-nav { margin-left: 10px; display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.vh-nav .btn { min-width: 44px; }
+.vh-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.vch { border: 2px solid var(--c, #8f8f8f); background: color-mix(in srgb, var(--c, #8f8f8f) 22%, transparent); color: inherit; border-radius: 8px; padding: 4px 10px; cursor: pointer; font: inherit; font-weight: 700; font-size: 14px; }
+.vch:hover { filter: brightness(1.15); }
+.gal-stats { font-size: 14px; opacity: .85; margin-bottom: 12px; display: flex; gap: 16px; flex-wrap: wrap; }
+.wn-sub { margin: 0 0 12px; opacity: .8; }
+.wn-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.wn-bar select { max-width: 260px; }
+.wn-ent { margin: 18px 0 6px; font-size: 17px; display: flex; align-items: baseline; gap: 8px; }
+.wn-ent small { opacity: .7; font-weight: 400; }
+.wn-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border-left: 4px solid var(--c, #8f8f8f); background: color-mix(in srgb, var(--c, #8f8f8f) 14%, transparent); margin-bottom: 5px; flex-wrap: wrap; }
+.wn-row b { font-size: 16px; min-width: 56px; }
+.wn-row .md { flex: 1; min-width: 120px; opacity: .85; font-size: 14px; }
+.wn-row .btn { padding: 6px 12px; font-size: 13px; }
+.lb-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.lb-table th { text-align: left; font-size: 12px; opacity: .7; padding: 6px 8px; }
+.lb-table td { padding: 9px 8px; border-top: 1px solid rgba(128, 128, 128, .25); }
+.lb-table td.pl { width: 52px; font-weight: 800; font-size: 18px; }
+.lb-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.lb-table a { color: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
+.lb-table a:hover { text-decoration: underline; }
+#flash { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 18px; border-radius: 999px; z-index: 9999; font-size: 14px; }
+.pp-top { flex-wrap: wrap; }
+@media (max-width: 560px) {
+  .pp-top { gap: 6px; }
+  .vh-nav { margin: 0; gap: 6px; }
+  .vh-nav .btn, .pp-top .btn { padding: 9px 12px; min-width: 0; }
+  .wn-row { padding: 8px; } .stat-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -2869,6 +2940,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
 
 <div id="galleryView" class="panel hidden">
   <div class="cv-tabpane">
+    <div id="galStats" class="gal-stats hidden"></div>
     <div class="cv-filters">
       <div class="dd" id="ddGCity"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
       <div class="dd" id="ddGTransport"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
@@ -2922,13 +2994,42 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
   </div>
 </div>
 
+<div id="wantedView" class="panel hidden">
+  <div class="cv-tabpane">
+    <h2 class="cv-about-title">📷 Потрібні фото</h2>
+    <p class="wn-sub">Машини, яких ще немає на фото. Оберіть місто й додайте знімок прямо зі списку.</p>
+    <div class="wn-bar">
+      <select id="wnCity" class="cv-search"></select>
+      <select id="wnType" class="cv-search"></select>
+      <label class="veh-chk"><input type="checkbox" id="wnOld"> Разом зі списаними</label>
+    </div>
+    <div id="wnSummary" class="veh-cover hidden"></div>
+    <div id="wnList"></div>
+    <p id="wnMsg" class="msg"></p>
+  </div>
+</div>
+
+<div id="topView" class="panel hidden">
+  <div class="cv-tabpane">
+    <h2 class="cv-about-title">🏆 Рейтинг фотографів</h2>
+    <div class="wn-bar">
+      <div class="seg" id="topPeriod"><button type="button" data-p="all" class="on">Весь час</button><button type="button" data-p="30">30 днів</button><button type="button" data-p="7">7 днів</button></div>
+      <div class="seg" id="topMetric"><button type="button" data-m="photos" class="on">За фото</button><button type="button" data-m="views">За переглядами</button></div>
+    </div>
+    <p id="topMsg" class="msg"></p>
+    <div id="topList"></div>
+  </div>
+</div>
+
 <div id="vehicleView" class="panel hidden">
   <div class="cv-tabpane">
-    <div class="pp-top"><button class="btn light" id="vhBack" type="button">← Назад</button></div>
+    <div class="pp-top"><button class="btn light" id="vhBack" type="button">← Назад</button>
+      <span class="vh-nav"><button class="btn light" id="vhPrev" type="button" disabled>←</button><button class="btn light" id="vhNext" type="button" disabled>→</button><button class="btn light" id="vhShare" type="button" title="Скопіювати посилання">🔗 Поділитись</button></span></div>
     <h2 id="vpTitle" class="cv-about-title"></h2>
     <div id="vpActions" class="pf-actions hidden"><button class="btn" id="vpEdit" type="button">✎ Редагувати</button></div>
     <div id="vhFacts" class="vh-grid"></div>
-    <h3 class="cv-about-title">Фото</h3>
+    <div id="vhSimilar" class="hidden"><h3 class="cv-about-title">Інші машини цієї моделі в підприємстві</h3><div id="vhSimilarList" class="vh-chips"></div></div>
+    <div class="vh-photos-head"><h3 class="cv-about-title" id="vhPhotosTitle">Фото</h3><button class="btn dark" id="vpAddPhoto" type="button">📷 Додати фото цього ТЗ</button></div>
     <div id="vhGrid" class="ph-grid"></div>
     <p id="vhEmpty" class="cv-empty hidden">Фотографій поки немає</p>
   </div>
@@ -3115,6 +3216,19 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
           <button class="btn dark hidden" id="addRoute" type="button">+ Додати маршрут</button>
           <input class="cv-search" id="vehFilter" type="text" placeholder="Бортовий/держ. №" autocomplete="off">
         </div>
+        <div class="veh-tools">
+          <div class="seg" id="vehModeSeg" role="group" aria-label="Вигляд">
+            <button type="button" data-m="table" class="on">☰ Таблиця</button>
+            <button type="button" data-m="grid">▦ Сітка парку</button>
+          </div>
+          <label class="veh-chk"><input type="checkbox" id="vehNoPhoto"> Лише без фото</label>
+          <label class="veh-chk hidden" id="vehGapsLbl"><input type="checkbox" id="vehGaps"> Показати пропущені номери</label>
+          <button class="btn light" id="vehExport" type="button" title="Завантажити список ТЗ у CSV">⬇ CSV</button>
+          <button class="btn light" id="vehPrint" type="button" title="Надрукувати список">🖨 Друк</button>
+        </div>
+        <div id="vehIssueBar" class="veh-issue hidden"></div>
+        <div id="vehCover" class="veh-cover hidden"></div>
+        <details class="veh-stats" id="vehStatsBox"><summary>📊 Статистика парку</summary><div id="vehStats"></div></details>
       </div>
       <div id="vehList" class="veh-wrap"></div>
       <p id="vehEmpty" class="cv-empty">ТС поки немає</p>
@@ -3132,6 +3246,9 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
       <button class="side-item" id="openGallery" type="button">Фотогалерея</button>
       <button class="side-item" id="openSearch" type="button">🔎 Пошук транспорту</button>
       <button class="side-item" id="openMap" type="button">🗺️ Карта</button>
+      <button class="side-item" id="openWanted" type="button">📷 Потрібні фото</button>
+      <button class="side-item" id="openTop" type="button">🏆 Рейтинг фотографів</button>
+      <button class="side-item" id="openRandom" type="button">🎲 Випадкове фото</button>
       <button class="side-item" id="openMy" type="button">Мої фото</button>
       <button class="side-item" type="button">Схеми</button>
       <button class="side-item" id="openCreateCity" type="button">Створити місто</button>
@@ -3948,6 +4065,13 @@ const myFollows = new Set();
 let regShownAt = 0;
 let vpPrev = null;
 let vpCur = null;
+let phCount = {};
+let phCountReady = false;
+let vehMode = 'table';
+let vehNoPhoto = false;
+let vehIssue = null;
+let vehGaps = false;
+let navCache = { ent: null, list: [] };
 let phBatch = [];
 let cmReply = null;
 let albumCur = null;
@@ -4866,11 +4990,11 @@ function buildVehTable(list, editable) {
   [
     ['№', 'fleet_no'], ['Держ. №', 'plate_no'], ['Тип', 'vehicle_type'], ['Модель', 'model'],
     ['Зав. №', 'factory_no'], ['Побуд.', 'build_year'], ['Надійшов', 'arrived'],
-    ['Поч. роб.', 'start_date'], ['Списаний', 'written_off'], ['Примітка', 'note']
+    ['Поч. роб.', 'start_date'], ['Списаний', 'written_off'], ['📷', 'photos'], ['Примітка', 'note']
   ].forEach(([h, k]) => {
     const th = document.createElement('th');
     th.appendChild(document.createTextNode(h));
-    if (k === 'note') {
+    if (k === 'note' || k === 'photos') {
       head.appendChild(th);
       return;
     }
@@ -4918,9 +5042,101 @@ function buildVehTable(list, editable) {
       tr.insertCell().textContent = v.arrived || '—';
       tr.insertCell().textContent = v.start_date || '—';
       tr.insertCell().textContent = v.written_off || '—';
+      const pc = phCount[v.fleet_no] || 0;
+      const pcell = tr.insertCell();
+      pcell.textContent = pc ? pc : (phCountReady ? '—' : '');
+      pcell.title = pc ? 'Фото на сайті: ' + pc : 'Фото ще немає';
       tr.insertCell().textContent = v.note || '';
     });
   return table;
+}
+
+function buildVehGrid(list, gaps, typeKey) {
+  const wrap = document.createElement('div');
+  wrap.className = 'veh-grid';
+  const items = list.map(v => ({ v })).concat((gaps || []).map(n => ({ ghost: n })));
+  items
+    .sort((a, b) => String(a.ghost || a.v.fleet_no).localeCompare(String(b.ghost || b.v.fleet_no), undefined, { numeric: true }))
+    .forEach(it => {
+      const t = document.createElement('button');
+      t.type = 'button';
+      const b = document.createElement('b');
+      const sm = document.createElement('small');
+      if (it.ghost) {
+        t.className = 'vt ghost';
+        b.textContent = it.ghost;
+        sm.textContent = 'немає в базі';
+        const can = canEditEnt();
+        t.disabled = !can;
+        t.title = can ? 'Додати машину з номером ' + it.ghost : 'Цього номера ще немає в базі';
+        t.addEventListener('click', () => { openVehForm(null); $('vehFleet').value = it.ghost; if (typeKey && typeKey !== 'other') setVehType(typeKey); });
+        t.append(b, sm);
+        wrap.appendChild(t);
+        return;
+      }
+      const v = it.v;
+      const st = VEH_STATUSES.find(x => x.key === v.status);
+      const n = phCount[v.fleet_no] || 0;
+      t.className = 'vt' + (phCountReady && !n ? ' nophoto' : '');
+      if (st) t.style.setProperty('--c', st.color);
+      t.title = [v.fleet_no, v.model, st && st.name, n ? 'фото: ' + n : 'фото ще немає'].filter(Boolean).join(' · ');
+      b.textContent = v.fleet_no || v.plate_no || '—';
+      sm.textContent = v.model || '';
+      t.append(b, sm);
+      if (n) {
+        const cam = document.createElement('span');
+        cam.className = 'cam';
+        cam.textContent = '📷' + (n > 1 ? n : '');
+        t.appendChild(cam);
+      }
+      t.addEventListener('click', () => openVehicle(v.id));
+      wrap.appendChild(t);
+    });
+  return wrap;
+}
+
+function renderCover() {
+  const box = $('vehCover');
+  const pool = vehicles.filter(v => v.status === 'active');
+  const base = pool.length ? pool : vehicles;
+  if (!phCountReady || !base.length) {
+    box.classList.add('hidden');
+    return;
+  }
+  const have = base.filter(v => phCount[v.fleet_no] > 0).length;
+  const pct = Math.round((have / base.length) * 100);
+  const label = pool.length ? 'у експлуатації' : 'у парку';
+  const line = document.createElement('div');
+  line.append('📷 Є фото: ');
+  const b1 = document.createElement('b');
+  b1.textContent = have;
+  const b2 = document.createElement('b');
+  b2.textContent = base.length;
+  line.append(b1, ' з ', b2, ' машин ' + label + ' (' + pct + '%)');
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  const fill = document.createElement('i');
+  fill.style.width = pct + '%';
+  bar.appendChild(fill);
+  box.replaceChildren(line, bar);
+  box.classList.remove('hidden');
+}
+
+async function loadPhotoCounts() {
+  const e = curEnt;
+  if (!e) return;
+  const map = {};
+  let ok = true;
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await db.from('photos').select('fleet_no').eq('enterprise_id', e.id).eq('status', 'approved').range(from, from + 999);
+    if (error) { ok = false; break; }
+    (data || []).forEach(r => { const k = String(r.fleet_no || '').trim(); if (k) map[k] = (map[k] || 0) + 1; });
+    if (!data || data.length < 1000) break;
+  }
+  if (curEnt !== e) return;
+  phCount = map;
+  phCountReady = ok;
+  renderVehicles();
 }
 
 function renderVehicles() {
@@ -4955,7 +5171,13 @@ function renderVehicles() {
   renderRoutes();
 
   const q = vehQuery.trim().toLowerCase();
-  const list = vehicles.filter(v => !q || [v.fleet_no, v.extra_no, v.plate_no, v.model, v.factory_no].some(x => String(x || '').toLowerCase().includes(q)));
+  const dupSet = dupFleets();
+  const list = vehicles.filter(v => (!q || [v.fleet_no, v.extra_no, v.plate_no, v.model, v.factory_no].some(x => String(x || '').toLowerCase().includes(q))) && (!vehNoPhoto || !(phCount[v.fleet_no] > 0)) && issueOk(v, dupSet));
+  renderCover();
+  renderStats();
+  renderIssueBar(list.length);
+  $('vehGapsLbl').classList.toggle('hidden', vehMode !== 'grid');
+  document.querySelectorAll('#vehModeSeg button').forEach(b => b.classList.toggle('on', b.dataset.m === vehMode));
   const typeKeys = ENT_TYPES.map(t => t.key);
   const typeOf = v => (typeKeys.includes(v.vehicle_type) ? v.vehicle_type : 'other');
   const usedTypes = ENT_TYPES.filter(t => list.some(v => typeOf(v) === t.key));
@@ -4977,12 +5199,26 @@ function renderVehicles() {
     }
     const mainPart = part.filter(v => !VEH_OLD.includes(v.status));
     const oldPart = part.filter(v => VEH_OLD.includes(v.status));
-    if (mainPart.length) blocks.push(buildVehTable(mainPart, edit));
+    if (mainPart.length) {
+      if (vehMode === 'grid') {
+        const filtering = q || vehNoPhoto || vehIssue;
+        const gaps = vehGaps && !filtering ? fleetGaps(vehicles.filter(v => typeOf(v) === t.key)) : [];
+        blocks.push(buildVehGrid(mainPart, gaps, t.key));
+        if (gaps.length) {
+          const gp = document.createElement('p');
+          gp.className = 'veh-gaps';
+          gp.textContent = 'Пропущені номери (' + gaps.length + '): ' + compressRanges(gaps);
+          blocks.push(gp);
+        }
+      } else {
+        blocks.push(buildVehTable(mainPart, edit));
+      }
+    }
     if (oldPart.length) {
       const h = document.createElement('h3');
       h.className = 'veh-sub';
       h.textContent = 'Списані, передані і модернізовані ТЗ';
-      blocks.push(h, buildVehTable(oldPart, edit));
+      blocks.push(h, vehMode === 'grid' ? buildVehGrid(oldPart, [], t.key) : buildVehTable(oldPart, edit));
     }
   });
   $('vehList').replaceChildren(...blocks);
@@ -5000,14 +5236,23 @@ async function loadVehicles() {
   if (curEnt !== e) return;
   vehicles = error ? [] : data || [];
   $('vehEmpty').textContent = error ? error.message : 'ТС поки немає';
+  navCache = { ent: null, list: [] };
   renderVehicles();
   if (vpCur && !$('vehicleView').classList.contains('hidden')) renderVehiclePage(vpCur.id);
+  loadPhotoCounts();
 }
 
 function openEntPage(e) {
   curEnt = e;
   vehicles = [];
   vehQuery = '';
+  phCount = {};
+  phCountReady = false;
+  vehNoPhoto = false;
+  vehIssue = null;
+  vehGaps = false;
+  $('vehNoPhoto').checked = false;
+  $('vehGaps').checked = false;
   $('vehFilter').value = '';
   $('vehEmpty').textContent = 'Завантаження...';
   routes = [];
@@ -7267,7 +7512,7 @@ let phSugTimer = null;
 let phEditId = null;
 let myPhotos = [];
 const UP_FIELDS = ['phFleet', 'phRoute', 'phRouteNote', 'phNote', 'phTags', 'phDD', 'phMM', 'phYYYY', 'phPlace'];
-const PAGES = ['requestsView', 'galleryView', 'myView', 'uploadView', 'photoPage', 'profileView', 'searchView', 'vehicleView', 'mapView', 'albumView'];
+const PAGES = ['requestsView', 'galleryView', 'myView', 'uploadView', 'photoPage', 'profileView', 'searchView', 'vehicleView', 'mapView', 'albumView', 'wantedView', 'topView'];
 const DATE_KINDS = [['exact', 'Точна дата'], ['approx', 'Приблизна дата'], ['before', 'Не пізніше'], ['after', 'Не раніше'], ['unknown', 'Невідома дата']];
 
 function phSetBtn(id, text) {
@@ -7555,6 +7800,8 @@ function route(fromPop) {
   else if (h.startsWith('#search')) openSearch(decodeURIComponent(h.slice(8) || ''));
   else if (h.startsWith('#vehicle=')) openVehicle(h.slice(9));
   else if (h === '#map') openMap();
+  else if (h === '#wanted') openWanted();
+  else if (h === '#top') openTop();
   else if (h.startsWith('#album=')) openAlbum(h.slice(7));
   else if (fromPop) PAGES.forEach(id => $(id).classList.add('hidden'));
 }
@@ -7577,7 +7824,7 @@ function upReset() {
   phBatchClear();
 }
 
-async function openPhotoForm(p) {
+async function openPhotoForm(p, pre) {
   const { data: s } = await db.auth.getSession();
   if (!s.session) {
     openModal('login');
@@ -7592,8 +7839,8 @@ async function openPhotoForm(p) {
     return;
   }
   phCityList = list.map(c => ({ key: c.id, name: c.name + (c.country ? ' · ' + c.country : '') }));
-  const start = (p && list.find(c => c.id === p.city_id)) || list.find(c => c.id === currentId) || null;
-  const pref = p ? p.enterprise_id : (start && curEnt && curEnt.city_id === start.id ? curEnt.id : null);
+  const start = (p && list.find(c => c.id === p.city_id)) || (pre && list.find(c => c.id === pre.city_id)) || list.find(c => c.id === currentId) || null;
+  const pref = p ? p.enterprise_id : pre ? pre.enterprise_id : (start && curEnt && curEnt.city_id === start.id ? curEnt.id : null);
   phEditId = p ? p.id : null;
   upReset();
   phCityId = start ? start.id : null;
@@ -7619,6 +7866,13 @@ async function openPhotoForm(p) {
   setMsg($('phMsg'), '');
   showPage('uploadView', '#upload');
   await phFillEnts(pref);
+}
+
+/* нове фото для конкретного ТЗ: місто, підприємство й машина підставляються самі */
+async function openPhotoFormForVehicle(v) {
+  await openPhotoForm(null, { city_id: v.city_id, enterprise_id: v.enterprise_id });
+  if ($('uploadView').classList.contains('hidden')) return;     // не увійшли в акаунт: показано вікно входу
+  phPickVeh(v);
 }
 
 async function loadMy() {
@@ -8319,6 +8573,7 @@ function openGallery() {
   renderGallery();
   loadGallery();
   loadGalleryTop();
+  loadGalStats();
 }
 $('openGallery').addEventListener('click', openGallery);
 
@@ -9416,6 +9671,9 @@ $('srGo').addEventListener('click', () => runSearch($('srQ').value));
 $('srQ').addEventListener('keydown', e => { if (e.key === 'Enter') runSearch($('srQ').value); });
 $('openSearch').addEventListener('click', () => openSearch(''));
 $('vhBack').addEventListener('click', closeVehicle);
+document.querySelectorAll('#vehModeSeg button').forEach(b => b.addEventListener('click', () => { vehMode = b.dataset.m; renderVehicles(); }));
+$('vehNoPhoto').addEventListener('change', e => { vehNoPhoto = e.target.checked; renderVehicles(); });
+$('vpAddPhoto').addEventListener('click', () => { if (vpCur) openPhotoFormForVehicle(vpCur); });
 $('vpEdit').addEventListener('click', async () => {
   const v = vpCur;
   if (!v) return;
@@ -9522,6 +9780,7 @@ async function renderVehiclePage(id) {
     fact('Примітка', v.note)
   ].filter(Boolean));
 
+  loadFleetNav(v);
   const conds = [];
   const safe = x => String(x).replace(/[,()"\\]/g, ' ');
   if (v.fleet_no) conds.push('fleet_no.eq.' + safe(v.fleet_no));
@@ -9536,6 +9795,7 @@ async function renderVehiclePage(id) {
   if ($('vehicleView').classList.contains('hidden')) return;
   $('vhGrid').replaceChildren(...list.map(phCard));
   $('vhEmpty').classList.toggle('hidden', list.length > 0);
+  $('vhPhotosTitle').textContent = 'Фото' + (list.length ? ' (' + list.length + ')' : '');
 }
 
 /* --- карта --- */
@@ -9819,6 +10079,411 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   setTimeout(clean, 300);
   setTimeout(clean, 1500);
 });
+
+
+/* ======================= ДОДАТКОВІ МОЖЛИВОСТІ ПАРКУ ======================= */
+const natCmp = (a, b) => String(a || '').localeCompare(String(b || ''), undefined, { numeric: true });
+const isNumStr = x => /^\d+$/.test(String(x || '').trim());
+
+function flash(msg) {
+  const old = document.getElementById('flash');
+  if (old) old.remove();
+  const f = document.createElement('div');
+  f.id = 'flash';
+  f.textContent = msg;
+  document.body.appendChild(f);
+  setTimeout(() => f.remove(), 2400);
+}
+
+async function fetchAll(table, cols, apply, cap) {
+  const out = [];
+  for (let from = 0; from < (cap || 5000); from += 1000) {
+    const { data, error } = await apply(db.from(table).select(cols)).range(from, from + 999);
+    if (error) throw error;
+    out.push(...(data || []));
+    if (!data || data.length < 1000) break;
+  }
+  return out;
+}
+
+/* --- якість даних / фільтри --- */
+const VEH_ISSUES = {
+  nomodel: ['без моделі', v => !v.model],
+  noyear: ['без року випуску', v => v.build_year == null],
+  novin: ['без VIN', v => !v.vin],
+  nofactory: ['без заводського №', v => !v.factory_no],
+  dups: ['з однаковим бортовим номером', (v, d) => d.has(String(v.fleet_no))]
+};
+function dupFleets() {
+  const cnt = {};
+  vehicles.forEach(v => { const k = String(v.fleet_no); cnt[k] = (cnt[k] || 0) + 1; });
+  return new Set(Object.keys(cnt).filter(k => cnt[k] > 1));
+}
+function issueOk(v, dupSet) {
+  return !vehIssue || VEH_ISSUES[vehIssue][1](v, dupSet);
+}
+function renderIssueBar(shown) {
+  const bar = $('vehIssueBar');
+  if (!vehIssue) { bar.classList.add('hidden'); return; }
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'btn light';
+  b.textContent = '✕ Скинути';
+  b.addEventListener('click', () => { vehIssue = null; renderVehicles(); });
+  const t = document.createElement('span');
+  t.textContent = 'Показано машини ' + VEH_ISSUES[vehIssue][0] + ': ' + shown;
+  bar.replaceChildren(t, b);
+  bar.classList.remove('hidden');
+}
+
+/* --- статистика парку --- */
+function barBlock(title, rows) {
+  const box = document.createElement('div');
+  const h4 = document.createElement('h4');
+  h4.textContent = title;
+  box.appendChild(h4);
+  const max = Math.max(1, ...rows.map(r => r[1]));
+  rows.forEach(([label, n, color]) => {
+    const row = document.createElement('div');
+    row.className = 'brow';
+    const lb = document.createElement('span');
+    lb.className = 'lb';
+    lb.textContent = label;
+    lb.title = label;
+    const nm = document.createElement('span');
+    nm.className = 'nm';
+    nm.textContent = n;
+    const tr = document.createElement('div');
+    tr.className = 'tr';
+    const i = document.createElement('i');
+    i.style.width = Math.max(3, Math.round((n / max) * 100)) + '%';
+    if (color) i.style.background = color;
+    tr.appendChild(i);
+    row.append(lb, nm, tr);
+    box.appendChild(row);
+  });
+  return box;
+}
+
+function renderStats() {
+  const box = $('vehStats');
+  const det = $('vehStatsBox');
+  det.classList.toggle('hidden', !vehicles.length);
+  if (!vehicles.length || !det.open) { if (!vehicles.length) box.replaceChildren(); return; }
+  const grid = document.createElement('div');
+  grid.className = 'stat-grid';
+  const byStatus = VEH_STATUSES.map(st => [st.name, vehicles.filter(v => v.status === st.key).length, st.color === '#ffffff' ? '#8fb4ff' : st.color]).filter(r => r[1]);
+  grid.appendChild(barBlock('За статусом', byStatus));
+  const mc = {};
+  vehicles.forEach(v => { const k = v.model || '— без моделі —'; mc[k] = (mc[k] || 0) + 1; });
+  const models = Object.entries(mc).sort((a, b) => b[1] - a[1]);
+  const topM = models.slice(0, 8).map(([k, n]) => [k, n]);
+  const rest = models.slice(8).reduce((a, [, n]) => a + n, 0);
+  if (rest) topM.push(['Інші моделі (' + (models.length - 8) + ')', rest]);
+  grid.appendChild(barBlock('За моделями', topM));
+  const yc = {};
+  vehicles.forEach(v => { if (v.build_year != null) yc[v.build_year] = (yc[v.build_year] || 0) + 1; });
+  const years = Object.keys(yc).sort((a, b) => a - b).map(y => [String(y), yc[y]]);
+  if (years.length) grid.appendChild(barBlock('За роком випуску', years));
+  const q = document.createElement('div');
+  const qh = document.createElement('h4');
+  qh.textContent = 'Якість даних (натисніть, щоб побачити машини)';
+  const lst = document.createElement('div');
+  lst.className = 'issue-list';
+  const dupSet = dupFleets();
+  Object.entries(VEH_ISSUES).forEach(([key, [label, fn]]) => {
+    const n = vehicles.filter(v => fn(v, dupSet)).length;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'issue-btn ' + (n ? 'bad' : 'ok');
+    b.append(n ? label : '✓ немає ' + label, ...(n ? [Object.assign(document.createElement('b'), { textContent: n })] : []));
+    if (n) b.addEventListener('click', () => { vehIssue = key; renderVehicles(); window.scrollTo({ top: document.getElementById('vehList').offsetTop - 80, behavior: 'smooth' }); });
+    lst.appendChild(b);
+  });
+  q.append(qh, lst);
+  grid.appendChild(q);
+  box.replaceChildren(grid);
+}
+
+/* --- пропущені номери --- */
+function fleetGaps(list) {
+  const nums = list.map(v => String(v.fleet_no || '').trim()).filter(isNumStr);
+  if (nums.length < 2) return [];
+  const width = Math.max(...nums.map(n => n.length));
+  const padded = nums.some(n => n.length > 1 && n[0] === '0');
+  const vals = [...new Set(nums.map(Number))].sort((a, b) => a - b);
+  const out = [];
+  for (let i = 1; i < vals.length && out.length < 400; i++) {
+    for (let n = vals[i - 1] + 1; n < vals[i] && out.length < 400; n++) out.push(padded ? String(n).padStart(width, '0') : String(n));
+  }
+  return out;
+}
+function compressRanges(nums) {
+  const out = [];
+  let st = 0;
+  for (let i = 1; i <= nums.length; i++) {
+    if (i === nums.length || Number(nums[i]) !== Number(nums[i - 1]) + 1) {
+      out.push(i - 1 === st ? nums[st] : nums[st] + '–' + nums[i - 1]);
+      st = i;
+    }
+  }
+  return out.join(', ');
+}
+
+/* --- експорт у CSV та друк --- */
+function fleetRows() {
+  return [...vehicles].sort((a, b) => natCmp(a.fleet_no, b.fleet_no));
+}
+function exportFleetCsv() {
+  if (!curEnt || !vehicles.length) { flash('Немає чого експортувати'); return; }
+  const esc = x => { const t = String(x == null ? '' : x); return /[;"\n\r]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+  const head = ['Тип', 'Борт', 'Держ. №', 'Модель', 'Зав. №', 'Рік', 'VIN', 'Надійшов', 'Початок', 'Списаний', 'Статус', 'Примітка'];
+  const rows = fleetRows().map(v => [(TYPE_SINGLE[v.vehicle_type] || 'інше').toLowerCase(), v.fleet_no, v.plate_no, v.model, v.factory_no, v.build_year, v.vin, v.arrived, v.start_date, v.written_off, v.status, v.note]);
+  const csv = '\ufeff' + [head, ...rows].map(r => r.map(esc).join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'парк_' + String(curEnt.name).replace(/[^\p{L}\p{N}]+/gu, '_') + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  flash('Файл завантажено: ' + vehicles.length + ' ТЗ');
+}
+function printFleet() {
+  if (!curEnt || !vehicles.length) { flash('Немає чого друкувати'); return; }
+  const e = x => String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const stName = k => (VEH_STATUSES.find(s => s.key === k) || {}).name || '';
+  const rows = fleetRows().map(v => '<tr><td><b>' + e(v.fleet_no) + '</b></td><td>' + e(v.plate_no) + '</td><td>' + e(TYPE_SINGLE[v.vehicle_type]) + '</td><td>' + e(v.model) + '</td><td>' + e(v.factory_no) +
+    '</td><td>' + e(v.build_year) + '</td><td>' + e(v.arrived) + '</td><td>' + e(v.written_off) + '</td><td>' + e(stName(v.status)) + '</td><td>' + e(v.note) + '</td></tr>').join('');
+  const w = window.open('', '_blank');
+  if (!w) { flash('Браузер заблокував вікно друку'); return; }
+  w.document.write('<!doctype html><html lang="uk"><head><meta charset="utf-8"><title>' + e(curEnt.name) + '</title><style>body{font:12px/1.35 system-ui,sans-serif;margin:16px}h1{font-size:18px;margin:0 0 4px}p{margin:0 0 10px;color:#555}table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:3px 6px;text-align:left;vertical-align:top}th{background:#eee}tr{page-break-inside:avoid}</style></head><body><h1>' +
+    e(curEnt.name) + '</h1><p>Список транспортних засобів: ' + vehicles.length + '. Станом на ' + new Date().toLocaleDateString('uk-UA') + '</p><table><thead><tr><th>№</th><th>Держ. №</th><th>Тип</th><th>Модель</th><th>Зав. №</th><th>Рік</th><th>Надійшов</th><th>Списаний</th><th>Статус</th><th>Примітка</th></tr></thead><tbody>' + rows + '</tbody></table></body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 300);
+}
+
+/* --- сторінка машини: сусідні номери, схожі, посилання --- */
+async function loadFleetNav(v) {
+  const prev = $('vhPrev'); const next = $('vhNext');
+  prev.disabled = next.disabled = true;
+  prev.textContent = '←'; next.textContent = '→';
+  $('vhSimilar').classList.add('hidden');
+  if (!v.enterprise_id) return;
+  try {
+    if (navCache.ent !== v.enterprise_id) {
+      const all = await fetchAll('vehicles', 'id, fleet_no, model, status', q => q.eq('enterprise_id', v.enterprise_id), 5000);
+      navCache = { ent: v.enterprise_id, list: all.sort((a, b) => natCmp(a.fleet_no, b.fleet_no)) };
+    }
+  } catch (err) { return; }
+  if (!vpCur || vpCur.id !== v.id) return;
+  const list = navCache.list;
+  const i = list.findIndex(x => x.id === v.id);
+  if (i < 0) return;
+  const set = (btn, item, left) => {
+    btn.disabled = !item;
+    btn.textContent = item ? (left ? '← ' + item.fleet_no : item.fleet_no + ' →') : (left ? '←' : '→');
+    btn.onclick = item ? () => openVehicle(item.id) : null;
+  };
+  set(prev, list[i - 1], true);
+  set(next, list[i + 1], false);
+  const same = v.model ? list.filter(x => x.model === v.model && x.id !== v.id).slice(0, 80) : [];
+  if (same.length) {
+    $('vhSimilarList').replaceChildren(...same.map(x => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'vch';
+      const st = VEH_STATUSES.find(s => s.key === x.status);
+      if (st) b.style.setProperty('--c', st.color);
+      b.textContent = x.fleet_no;
+      b.title = st ? st.name : '';
+      b.addEventListener('click', () => openVehicle(x.id));
+      return b;
+    }));
+    $('vhSimilar').classList.remove('hidden');
+  }
+}
+async function shareVehicle() {
+  if (!vpCur) return;
+  const url = location.origin + location.pathname + '#vehicle=' + vpCur.id;
+  const title = [vpCur.model, vpCur.fleet_no].filter(Boolean).join(' ');
+  if (navigator.share) {
+    try { await navigator.share({ title, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(url); flash('Посилання скопійовано'); } catch (e) { prompt('Скопіюйте посилання:', url); }
+}
+
+/* --- лічильники на фотогалереї --- */
+async function loadGalStats() {
+  const box = $('galStats');
+  try {
+    const cnt = t => db.from(t).select('id', { count: 'exact', head: true });
+    const [p, v, c] = await Promise.all([cnt('photos').eq('status', 'approved'), cnt('vehicles'), cnt('cities').eq('is_published', true)]);
+    if ([p, v, c].some(x => x.error || x.count == null)) { box.classList.add('hidden'); return; }
+    const f = n => Number(n).toLocaleString('uk-UA');
+    box.replaceChildren(...[['📸', f(p.count) + ' фото'], ['🚌', f(v.count) + ' транспортних засобів'], ['🌆', f(c.count) + ' міст']].map(([i, t]) => {
+      const sp = document.createElement('span'); sp.textContent = i + ' ' + t; return sp;
+    }));
+    box.classList.remove('hidden');
+  } catch (e) { box.classList.add('hidden'); }
+}
+
+/* --- Потрібні фото --- */
+let wnCityId = null;
+let wnTok = 0;
+let wnLimit = 300;
+async function openWanted() {
+  showPage('wantedView', '#wanted');
+  const list = cities.filter(c => c.is_published).sort((a, b) => String(a.name).localeCompare(String(b.name), 'uk'));
+  const sel = $('wnCity');
+  sel.replaceChildren(...list.map(c => Object.assign(document.createElement('option'), { value: c.id, textContent: c.name + (c.country ? ' · ' + c.country : '') })));
+  if (!list.length) { setMsg($('wnMsg'), 'Поки немає міст'); return; }
+  if (!wnCityId || !list.some(c => c.id === wnCityId)) wnCityId = (list.find(c => /хмельницьк/i.test(c.name)) || list[0]).id;
+  sel.value = wnCityId;
+  const ts = $('wnType');
+  if (!ts.options.length) {
+    ts.replaceChildren(Object.assign(document.createElement('option'), { value: '', textContent: 'Усі види транспорту' }),
+      ...ENT_TYPES.map(t => Object.assign(document.createElement('option'), { value: t.key, textContent: TYPE_PLURAL[t.key] || t.name })));
+  }
+  wnLimit = 300;
+  loadWanted();
+}
+async function loadWanted() {
+  const city = wnCityId; const tok = ++wnTok;
+  setMsg($('wnMsg'), 'Завантаження…');
+  $('wnList').replaceChildren();
+  $('wnSummary').classList.add('hidden');
+  let vs; let ps; let es;
+  try {
+    [vs, ps, es] = await Promise.all([
+      fetchAll('vehicles', 'id, city_id, enterprise_id, fleet_no, plate_no, model, vehicle_type, status', q => q.eq('city_id', city), 5000),
+      fetchAll('photos', 'enterprise_id, fleet_no', q => q.eq('city_id', city).eq('status', 'approved'), 20000),
+      db.from('enterprises').select('id, name').eq('city_id', city).then(r => r.data || [])
+    ]);
+  } catch (err) { if (tok === wnTok) setMsg($('wnMsg'), err.message || 'Помилка завантаження'); return; }
+  if (tok !== wnTok) return;
+  setMsg($('wnMsg'), '');
+  const have = new Set(ps.map(p => p.enterprise_id + '|' + String(p.fleet_no || '').trim()));
+  const typeF = $('wnType').value; const incOld = $('wnOld').checked;
+  const pool = vs.filter(v => (!typeF || v.vehicle_type === typeF) && (incOld || !VEH_OLD.includes(v.status)));
+  const missing = pool.filter(v => !have.has(v.enterprise_id + '|' + String(v.fleet_no || '').trim()));
+  if (!pool.length) { setMsg($('wnMsg'), 'У цьому місті ще немає машин у базі'); return; }
+  const pct = Math.round(((pool.length - missing.length) / pool.length) * 100);
+  const sum = document.createElement('div');
+  sum.append('Без фото: ');
+  const b1 = document.createElement('b'); b1.textContent = missing.length;
+  const b2 = document.createElement('b'); b2.textContent = pool.length;
+  sum.append(b1, ' з ', b2, ' машин (на фото вже ' + pct + '%)');
+  const bar = document.createElement('div'); bar.className = 'bar';
+  const fill = document.createElement('i'); fill.style.width = pct + '%'; bar.appendChild(fill);
+  $('wnSummary').replaceChildren(sum, bar);
+  $('wnSummary').classList.remove('hidden');
+  if (!missing.length) { setMsg($('wnMsg'), '🎉 Усі машини за цими умовами вже є на фото'); return; }
+  const names = Object.fromEntries(es.map(e => [e.id, e.name]));
+  const groups = {};
+  missing.forEach(v => { (groups[v.enterprise_id] = groups[v.enterprise_id] || []).push(v); });
+  const keys = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
+  let shown = 0;
+  const nodes = [];
+  for (const k of keys) {
+    if (shown >= wnLimit) break;
+    const h = document.createElement('h3'); h.className = 'wn-ent';
+    h.append(names[k] || 'Без підприємства', Object.assign(document.createElement('small'), { textContent: groups[k].length + ' без фото' }));
+    nodes.push(h);
+    for (const v of groups[k].sort((a, b) => natCmp(a.fleet_no, b.fleet_no))) {
+      if (shown >= wnLimit) break;
+      shown++;
+      const st = VEH_STATUSES.find(x => x.key === v.status);
+      const row = document.createElement('div'); row.className = 'wn-row';
+      if (st) row.style.setProperty('--c', st.color);
+      row.append(Object.assign(document.createElement('b'), { textContent: v.fleet_no || v.plate_no || '—' }),
+        Object.assign(document.createElement('span'), { className: 'md', textContent: [v.model, st && v.status !== 'active' ? st.name : ''].filter(Boolean).join(' · ') }));
+      const open = Object.assign(document.createElement('button'), { type: 'button', className: 'btn light', textContent: 'Відкрити' });
+      open.addEventListener('click', () => openVehicle(v.id));
+      const add = Object.assign(document.createElement('button'), { type: 'button', className: 'btn dark', textContent: '📷 Додати фото' });
+      add.addEventListener('click', () => openPhotoFormForVehicle(v));
+      row.append(open, add);
+      nodes.push(row);
+    }
+  }
+  if (shown < missing.length) {
+    const more = Object.assign(document.createElement('button'), { type: 'button', className: 'btn light', textContent: 'Показати ще (' + (missing.length - shown) + ')' });
+    more.addEventListener('click', () => { wnLimit += 300; loadWanted(); });
+    nodes.push(more);
+  }
+  $('wnList').replaceChildren(...nodes);
+}
+
+/* --- Рейтинг фотографів --- */
+let topPeriod = 'all';
+let topMetric = 'photos';
+function openTop() {
+  showPage('topView', '#top');
+  loadTop();
+}
+async function loadTop() {
+  document.querySelectorAll('#topPeriod button').forEach(b => b.classList.toggle('on', b.dataset.p === topPeriod));
+  document.querySelectorAll('#topMetric button').forEach(b => b.classList.toggle('on', b.dataset.m === topMetric));
+  setMsg($('topMsg'), 'Завантаження…');
+  $('topList').replaceChildren();
+  let rows;
+  try {
+    rows = await fetchAll('photos', 'owner_id, owner_name, views, created_at', q => {
+      q = q.eq('status', 'approved');
+      return topPeriod === 'all' ? q : q.gte('created_at', new Date(Date.now() - Number(topPeriod) * 864e5).toISOString());
+    }, 20000);
+  } catch (err) { setMsg($('topMsg'), err.message || 'Помилка'); return; }
+  if (!rows.length) { setMsg($('topMsg'), 'За цей період фото ще немає'); return; }
+  setMsg($('topMsg'), '');
+  const m = new Map();
+  rows.forEach(r => {
+    const a = m.get(r.owner_id) || { id: r.owner_id, name: r.owner_name || 'Автор', photos: 0, views: 0, last: '' };
+    a.photos++;
+    a.views += Number(r.views) || 0;
+    if (String(r.created_at) > a.last) a.last = String(r.created_at);
+    m.set(r.owner_id, a);
+  });
+  const list = [...m.values()].sort((a, b) => b[topMetric] - a[topMetric] || b.photos - a.photos).slice(0, 50);
+  const table = document.createElement('table'); table.className = 'lb-table';
+  const hr = table.createTHead().insertRow();
+  ['#', 'Автор', 'Фото', 'Перегляди', 'Остання'].forEach((t, i) => { const th = document.createElement('th'); th.textContent = t; if (i >= 2 && i <= 3) th.style.textAlign = 'right'; hr.appendChild(th); });
+  const tb = table.createTBody();
+  list.forEach((a, i) => {
+    const tr = tb.insertRow();
+    const pl = tr.insertCell(); pl.className = 'pl'; pl.textContent = ['🥇', '🥈', '🥉'][i] || i + 1;
+    const nm = tr.insertCell();
+    const link = document.createElement('a'); link.textContent = a.name; link.addEventListener('click', () => openProfile(a.id));
+    nm.appendChild(link);
+    const c1 = tr.insertCell(); c1.className = 'num'; c1.textContent = a.photos.toLocaleString('uk-UA');
+    const c2 = tr.insertCell(); c2.className = 'num'; c2.textContent = a.views.toLocaleString('uk-UA');
+    tr.insertCell().textContent = a.last ? new Date(a.last).toLocaleDateString('uk-UA') : '—';
+  });
+  $('topList').replaceChildren(table);
+}
+
+/* --- випадкове фото --- */
+async function openRandomPhoto() {
+  const { count, error } = await db.from('photos').select('id', { count: 'exact', head: true }).eq('status', 'approved');
+  if (error || !count) { flash('Фото ще немає'); return; }
+  const i = Math.floor(Math.random() * count);
+  const { data } = await db.from('photos').select('id').eq('status', 'approved').order('created_at').range(i, i);
+  if (data && data[0]) openPhotoById(data[0].id); else flash('Не вдалося обрати фото');
+}
+
+/* --- підключення кнопок --- */
+$('vehGaps').addEventListener('change', e => { vehGaps = e.target.checked; renderVehicles(); });
+$('vehStatsBox').addEventListener('toggle', renderStats);
+$('vehExport').addEventListener('click', exportFleetCsv);
+$('vehPrint').addEventListener('click', printFleet);
+$('vhShare').addEventListener('click', shareVehicle);
+$('openWanted').addEventListener('click', openWanted);
+$('openTop').addEventListener('click', openTop);
+$('openRandom').addEventListener('click', openRandomPhoto);
+$('wnCity').addEventListener('change', e => { wnCityId = e.target.value; wnLimit = 300; loadWanted(); });
+$('wnType').addEventListener('change', () => { wnLimit = 300; loadWanted(); });
+$('wnOld').addEventListener('change', () => { wnLimit = 300; loadWanted(); });
+document.querySelectorAll('#topPeriod button').forEach(b => b.addEventListener('click', () => { topPeriod = b.dataset.p; loadTop(); }));
+document.querySelectorAll('#topMetric button').forEach(b => b.addEventListener('click', () => { topMetric = b.dataset.m; loadTop(); }));
 
 $('ppBack').addEventListener('click', closePhoto);
 
