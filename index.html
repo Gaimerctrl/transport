@@ -2763,6 +2763,12 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
   .vh-nav .btn, .pp-top .btn { padding: 9px 12px; min-width: 0; }
   .wn-row { padding: 8px; } .stat-grid { grid-template-columns: 1fr; }
 }
+
+/* поля пошуку: без стандартного вигляду type=search і без пропозицій автозаповнення */
+input[type="search"] { -webkit-appearance: none; appearance: none; }
+input[type="search"]::-webkit-search-cancel-button, input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+@keyframes afStart { from { opacity: 1; } to { opacity: 1; } }
+input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
 </style>
 </head>
 <body>
@@ -2944,7 +2950,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     <div class="cv-filters">
       <div class="dd" id="ddGCity"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
       <div class="dd" id="ddGTransport"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
-      <label class="cv-route"><span>Маршрут</span><input id="gRoute" type="text" autocomplete="off"></label>
+      <label class="cv-route"><span>Маршрут</span><input id="gRoute" type="search" autocomplete="off" readonly enterkeyhint="search"></label>
       <div class="dd" id="ddGCategory"><button class="dd-btn" type="button"><span class="dd-label"></span><i class="dd-arrow"></i></button><div class="dd-menu"></div></div>
     </div>
     <div id="gTop" class="hidden">
@@ -2986,7 +2992,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
   <div class="cv-tabpane">
     <h2 class="cv-about-title">Пошук транспорту</h2>
     <div class="srch-bar">
-      <input id="srQ" class="cv-search" type="text" maxlength="30" placeholder="Бортовий або державний номер" autocomplete="off">
+      <input id="srQ" class="cv-search" type="search" maxlength="30" placeholder="Бортовий або державний номер" autocomplete="off" readonly enterkeyhint="search">
       <button class="btn dark" id="srGo" type="button">Шукати</button>
     </div>
     <p id="srMsg" class="msg"></p>
@@ -3214,7 +3220,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
         <div class="ev-actions">
           <button class="btn dark hidden" id="addVeh" type="button">+ Додати ТС</button>
           <button class="btn dark hidden" id="addRoute" type="button">+ Додати маршрут</button>
-          <input class="cv-search" id="vehFilter" type="text" placeholder="Бортовий/держ. №" autocomplete="off">
+          <input class="cv-search" id="vehFilter" type="search" placeholder="Бортовий/держ. №" autocomplete="off" readonly enterkeyhint="search">
         </div>
         <div class="veh-tools">
           <div class="seg" id="vehModeSeg" role="group" aria-label="Вигляд">
@@ -3259,7 +3265,7 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
     </div>
     <div class="side-block">
       <h3>Міста</h3>
-      <input class="cv-search tree-search" id="citySearch" type="text" placeholder="Муніципалітет, регіон, країна" autocomplete="off" name="city_search" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other">
+      <input class="cv-search tree-search" id="citySearch" type="search" placeholder="Муніципалітет, регіон, країна" autocomplete="off" name="city_search" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly enterkeyhint="search">
       <div id="allCities" class="tree"></div>
     </div>
   </aside>
@@ -10066,19 +10072,31 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 }
 
 /* --- не даємо браузеру підставляти email у пошукові поля --- */
-['citySearch', 'vehFilter', 'gRoute', 'srQ', 'accSearch'].forEach(id => {
+const NOFILL = ['citySearch', 'vehFilter', 'gRoute', 'srQ', 'accSearch'];
+const looksLikeEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
+function cleanFill(inp) {
+  if (!inp || !looksLikeEmail(inp.value)) return;
+  inp.value = '';
+  inp.dispatchEvent(new Event('input', { bubbles: true }));
+}
+NOFILL.forEach(id => {
   const inp = $(id);
   if (!inp) return;
-  const clean = () => {
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim())) {
-      inp.value = '';
-      inp.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-  };
-  inp.addEventListener('focus', clean);
-  setTimeout(clean, 300);
-  setTimeout(clean, 1500);
+  inp.setAttribute('autocomplete', 'off');
+  inp.setAttribute('data-lpignore', 'true');
+  inp.setAttribute('data-1p-ignore', 'true');
+  const unlock = () => inp.removeAttribute('readonly');
+  inp.addEventListener('pointerdown', unlock);
+  inp.addEventListener('touchstart', unlock, { passive: true });
+  inp.addEventListener('focus', () => { unlock(); cleanFill(inp); });
+  inp.addEventListener('blur', () => { cleanFill(inp); if (!inp.value) inp.setAttribute('readonly', ''); });
+  inp.addEventListener('change', () => cleanFill(inp));
 });
+/* Chrome підставляє значення з затримкою й без події: ловимо через CSS-анімацію та регулярну перевірку */
+document.addEventListener('animationstart', e => { if (e.animationName === 'afStart' && NOFILL.includes(e.target.id)) cleanFill(e.target); }, true);
+setInterval(() => NOFILL.forEach(id => cleanFill($(id))), 700);
+window.addEventListener('pageshow', () => NOFILL.forEach(id => cleanFill($(id))));
+window.addEventListener('focus', () => NOFILL.forEach(id => cleanFill($(id))));
 
 
 /* ======================= ДОДАТКОВІ МОЖЛИВОСТІ ПАРКУ ======================= */
