@@ -4142,6 +4142,8 @@ $('cvPhotoFile').addEventListener('change', async e => {
 });
 
 function showCity(id) {
+  vpPrev = null;
+  vpCur = null;
   curEnt = null;
   currentId = id;
   renderCity();
@@ -7535,6 +7537,7 @@ function hidePages() {
 
 function showPage(id, hash) {
   window.scrollTo({ top: 0 });
+  if (id !== 'vehicleView') { vpPrev = null; vpCur = null; }
   currentId = null;
   curEnt = null;
   renderCity();
@@ -9430,13 +9433,23 @@ async function openVehicle(id) {
       pages: PAGES.filter(x => x !== 'vehicleView' && !$(x).classList.contains('hidden'))
     };
   }
+  /* скидаємо все, що могло лишитись відкритим, щоб меню й кнопки не блокувались */
+  try { if ($('overlay').classList.contains('open')) closeModal(); } catch (e) { /* ігноруємо */ }
+  document.querySelectorAll('.dd.open').forEach(x => x.classList.remove('open'));
+  document.body.style.overflow = '';
   currentId = null;
   curEnt = null;
-  renderCity();
+  /* спершу показуємо сторінку, а вже потім малюємо: навіть якщо щось впаде, меню лишиться робочим */
   PAGES.forEach(x => $(x).classList.toggle('hidden', x !== 'vehicleView'));
   history.replaceState(null, '', '#vehicle=' + id);
   window.scrollTo({ top: 0 });
-  await renderVehiclePage(id);
+  try { renderCity(); } catch (e) { console.error(e); }
+  try {
+    await renderVehiclePage(id);
+  } catch (e) {
+    console.error(e);
+    $('vpTitle').textContent = 'Не вдалося завантажити дані транспорту';
+  }
 }
 
 function closeVehicle() {
@@ -9453,6 +9466,7 @@ function closeVehicle() {
     curEnt = pr.ent;
     history.replaceState(null, '', location.pathname + location.search);
     renderCity();
+    if (pr.ent) { try { renderVehicles(); } catch (e) { console.error(e); } }
   } else {
     history.replaceState(null, '', location.pathname + location.search);
     $('openGallery').click();
