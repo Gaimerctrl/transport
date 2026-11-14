@@ -2709,6 +2709,9 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
 .vt small { display: block; font-size: 10px; opacity: .75; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vt.nophoto { border-style: dashed; }
 .vt .vt-st { display: block; font-style: normal; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; margin-top: 3px; padding: 1px 3px; border-radius: 4px; background: color-mix(in srgb, var(--c, #8f8f8f) 45%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.veh-statbar { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.stchip { border: 1px solid var(--c, #8f8f8f); background: transparent; color: inherit; border-radius: 14px; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+.stchip.on { background: color-mix(in srgb, var(--c, #8f8f8f) 35%, transparent); font-weight: 700; }
 .vt-chip { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 6px; margin-left: 6px; border-radius: 8px; border: 1px solid var(--c, #8f8f8f); background: color-mix(in srgb, var(--c, #8f8f8f) 25%, transparent); vertical-align: middle; white-space: nowrap; }
 .vh-banner { margin: 10px 0; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--c, #8f8f8f); background: color-mix(in srgb, var(--c, #8f8f8f) 18%, transparent); font-weight: 700; }
 .vt .cam { position: absolute; top: -7px; right: -5px; background: #3fa66b; color: #fff; border-radius: 9px; font-size: 10px; font-weight: 700; padding: 1px 5px; }
@@ -3315,6 +3318,7 @@ input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
           <button class="btn light" id="vehExport" type="button" title="Завантажити список ТЗ у CSV">⬇ CSV</button>
           <button class="btn light" id="vehPrint" type="button" title="Надрукувати список">🖨 Друк</button>
         </div>
+        <div id="vehStatBar" class="veh-statbar hidden"></div>
         <div id="vehIssueBar" class="veh-issue hidden"></div>
         <div id="vehCover" class="veh-cover hidden"></div>
         <details class="veh-stats" id="vehStatsBox"><summary>📊 Статистика парку</summary><div id="vehStats"></div></details>
@@ -4160,6 +4164,7 @@ let phCount = {};
 let phCountReady = false;
 let vehMode = 'table';
 let vehNoPhoto = false;
+let vehStat = '';
 let vehIssue = null;
 let vehGaps = false;
 let navCache = { ent: null, list: [] };
@@ -5244,8 +5249,37 @@ async function loadPhotoCounts() {
   renderVehicles();
 }
 
+function statOk(v) {
+  if (!vehStat) return true;
+  if (vehStat === '_off') return v.status !== 'active';
+  return v.status === vehStat;
+}
+function renderStatBar() {
+  const bar = $('vehStatBar');
+  const cnt = {};
+  vehicles.forEach(v => { cnt[v.status] = (cnt[v.status] || 0) + 1; });
+  const keys = VEH_STATUSES.filter(x => cnt[x.key]);
+  if (keys.length < 2) { bar.classList.add('hidden'); if (vehStat) vehStat = ''; return; }
+  const off = vehicles.length - (cnt.active || 0);
+  const mk = (key, label, n, color) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'stchip' + (vehStat === key ? ' on' : '');
+    if (color) b.style.setProperty('--c', color);
+    b.textContent = label + ' · ' + n;
+    b.addEventListener('click', () => { vehStat = vehStat === key ? '' : key; renderVehicles(); });
+    return b;
+  };
+  bar.replaceChildren(
+    mk('', 'Усі', vehicles.length),
+    mk('_off', 'Не експлуатуються', off, '#ffde23'),
+    ...keys.map(x => mk(x.key, VEH_SHORT[x.key] ? x.key === 'active' ? 'Експлуатуються' : VEH_SHORT[x.key] : 'Експлуатуються', cnt[x.key], x.color)));
+  bar.classList.remove('hidden');
+}
+
 function renderVehicles() {
   if (!curEnt) return;
+  renderStatBar();
   const city = cities.find(x => x.id === curEnt.city_id);
   $('evCity').textContent = city ? city.name : '';
   $('evCountry').textContent = city && city.country ? city.country : '';
@@ -5277,7 +5311,7 @@ function renderVehicles() {
 
   const q = vehQuery.trim().toLowerCase();
   const dupSet = dupFleets();
-  const list = vehicles.filter(v => (!q || [v.fleet_no, v.extra_no, v.plate_no, v.model, v.factory_no].some(x => String(x || '').toLowerCase().includes(q))) && (!vehNoPhoto || !(phCount[v.fleet_no] > 0)) && issueOk(v, dupSet));
+  const list = vehicles.filter(v => (!q || [v.fleet_no, v.extra_no, v.plate_no, v.model, v.factory_no].some(x => String(x || '').toLowerCase().includes(q))) && (!vehNoPhoto || !(phCount[v.fleet_no] > 0)) && statOk(v) && issueOk(v, dupSet));
   renderCover();
   renderStats();
   renderIssueBar(list.length);
@@ -5306,7 +5340,7 @@ function renderVehicles() {
     const oldPart = part.filter(v => VEH_OLD.includes(v.status));
     if (mainPart.length) {
       if (vehMode === 'grid') {
-        const filtering = q || vehNoPhoto || vehIssue;
+        const filtering = q || vehNoPhoto || vehIssue || vehStat;
         const gaps = vehGaps && !filtering ? fleetGaps(vehicles.filter(v => typeOf(v) === t.key)) : [];
         blocks.push(buildVehGrid(mainPart, gaps, t.key));
         if (gaps.length) {
@@ -5354,6 +5388,7 @@ function openEntPage(e) {
   phCount = {};
   phCountReady = false;
   vehNoPhoto = false;
+  vehStat = '';
   vehIssue = null;
   vehGaps = false;
   $('vehNoPhoto').checked = false;
