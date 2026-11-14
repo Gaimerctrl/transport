@@ -2708,6 +2708,9 @@ html[data-theme="dark"] .up-inl input { color: #e8e8e8; }
 .vt b { display: block; font-size: 16px; }
 .vt small { display: block; font-size: 10px; opacity: .75; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vt.nophoto { border-style: dashed; }
+.vt .vt-st { display: block; font-style: normal; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; margin-top: 3px; padding: 1px 3px; border-radius: 4px; background: color-mix(in srgb, var(--c, #8f8f8f) 45%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vt-chip { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 6px; margin-left: 6px; border-radius: 8px; border: 1px solid var(--c, #8f8f8f); background: color-mix(in srgb, var(--c, #8f8f8f) 25%, transparent); vertical-align: middle; white-space: nowrap; }
+.vh-banner { margin: 10px 0; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--c, #8f8f8f); background: color-mix(in srgb, var(--c, #8f8f8f) 18%, transparent); font-weight: 700; }
 .vt .cam { position: absolute; top: -7px; right: -5px; background: #3fa66b; color: #fff; border-radius: 9px; font-size: 10px; font-weight: 700; padding: 1px 5px; }
 .vh-photos-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
 .vh-photos-head .cv-about-title { margin: 0; }
@@ -4896,6 +4899,7 @@ const VEH_STATUSES = [
   { key: 'plate_changed', name: 'Зміна держномера (в межах підприємства)', color: '#227eff' }
 ];
 
+const VEH_SHORT = { not_here: 'не експл. у місті', inactive: 'не експлуатується', withdrawn: 'виведений з експл.', written_off: 'списаний', unknown: 'доля невідома', rebuilt: 'КВР / модернізація', renumbered: 'перенумерований', plate_changed: 'зміна держномера' };
 let vehicles = [];
 let curEnt = null;
 let vehEditingId = null;
@@ -5120,6 +5124,13 @@ function buildVehTable(list, editable) {
         s.textContent = ' (' + v.extra_no + ')';
         num.appendChild(s);
       }
+      if (v.status && v.status !== 'active' && st) {
+        const ch = document.createElement('span');
+        ch.className = 'vt-chip';
+        ch.style.setProperty('--c', st.color);
+        ch.textContent = VEH_SHORT[v.status] || st.name;
+        num.appendChild(ch);
+      }
       tr.insertCell().textContent = v.plate_no || '—';
       const typeCell = tr.insertCell();
       typeCell.textContent = tp ? tp.abbr : '—';
@@ -5171,6 +5182,12 @@ function buildVehGrid(list, gaps, typeKey) {
       b.textContent = v.fleet_no || v.plate_no || '—';
       sm.textContent = v.model || '';
       t.append(b, sm);
+      if (v.status && v.status !== 'active') {
+        const bd = document.createElement('em');
+        bd.className = 'vt-st';
+        bd.textContent = VEH_SHORT[v.status] || (st && st.name) || '';
+        t.appendChild(bd);
+      }
       if (n) {
         const cam = document.createElement('span');
         cam.className = 'cam';
@@ -9858,6 +9875,13 @@ async function renderVehiclePage(id) {
     cityNode.textContent = c.name;
     cityNode.addEventListener('click', e => { e.preventDefault(); showCity(c.id); });
   }
+  let bn = $('vhBanner');
+  if (!bn) { bn = document.createElement('div'); bn.id = 'vhBanner'; $('vhFacts').parentNode.insertBefore(bn, $('vhFacts')); }
+  bn.className = 'vh-banner' + (v.status && v.status !== 'active' && st ? '' : ' hidden');
+  if (st) bn.style.setProperty('--c', st.color);
+  bn.textContent = v.status && v.status !== 'active' && st
+    ? '⚠ ' + (v.status === 'inactive' ? 'Не експлуатується' : st.name) + (v.written_off ? ' · ' + v.written_off : '')
+    : '';
   $('vhFacts').replaceChildren(...[
     fact('Місто', null, cityNode),
     fact('Підприємство', ent && ent.name),
