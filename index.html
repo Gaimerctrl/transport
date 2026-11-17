@@ -2269,6 +2269,7 @@ button {
 .rc-sch { position: relative; width: 110px; height: 76px; border-radius: 8px; overflow: hidden; border: 1px solid #3a3a40; background: #222; cursor: zoom-in; padding: 0; }
 .rc-sch img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rc-sch .x { position: absolute; top: 2px; right: 2px; border: 0; border-radius: 50%; width: 20px; height: 20px; line-height: 20px; font-size: 12px; background: rgba(0,0,0,.7); color: #fff; cursor: pointer; padding: 0; }
+.sch-tag { position: absolute; left: 3px; bottom: 3px; background: rgba(0,0,0,.75); color: #fff; font-size: 11px; font-weight: 700; padding: 0 6px; border-radius: 6px; }
 .rc-scheme-add { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
 #rcSchemeMsg { font-size: 12px; color: #ff8d8d; }
 .sch-ov { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
@@ -5868,7 +5869,13 @@ async function loadRouteSchemes(r) {
   const can = canEditEnt() && !!curEnt;
   const { data, error } = await db.from('route_schemes').select('*').eq('route_id', r.id).order('created_at');
   if (curRoute !== r) return;
-  if (error) { box.classList.add('hidden'); return; }   // SQL ще не запущено
+  if (error) {                                           // SQL ще не запущено
+    box.classList.toggle('hidden', !can);
+    $('rcSchemes').replaceChildren();
+    $('rcSchemeAdd').classList.add('hidden');
+    $('rcSchemeMsg').textContent = 'Схеми ще не налаштовано в базі: запустіть warns_schemes.sql у Supabase. (' + error.message + ')';
+    return;
+  }
   const list = data || [];
   $('rcSchemeAdd').classList.toggle('hidden', !can || list.length >= 6);
   box.classList.toggle('hidden', !list.length && !can);
@@ -5896,6 +5903,7 @@ async function loadRouteSchemes(r) {
         if (res.error) { $('rcSchemeMsg').textContent = res.error.message; return; }
         await db.storage.from('schemes').remove([x.path]);
         loadRouteSchemes(r);
+        loadCityRoutes();
       });
       b.appendChild(d);
     }
@@ -5937,6 +5945,7 @@ $('rcSchemeFile').addEventListener('change', async e => {
     }
     msg.textContent = '';
     loadRouteSchemes(r);
+    loadCityRoutes();
   } catch (err) {
     msg.textContent = 'Помилка: ' + (err.message || err);
   }
@@ -7446,11 +7455,45 @@ function renderCityRoutes() {
     });
     nets.push(card);
   });
+  const sch = cityRouteSchemes.filter(x => cityRoutes.some(r => r.id === x.route_id));
+  if (sch.length) {
+    const card = document.createElement('div');
+    card.className = 'rn-card';
+    const head = document.createElement('div');
+    head.className = 'rn-head';
+    const sm = document.createElement('small');
+    sm.textContent = 'Схеми маршрутів міста';
+    const nm = document.createElement('b');
+    nm.textContent = '🗺 ' + sch.length;
+    head.append(sm, nm);
+    const box = document.createElement('div');
+    box.className = 'rc-schemes';
+    sch.forEach(x => {
+      const r = cityRoutes.find(q => q.id === x.route_id);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'rc-sch';
+      b.title = 'Маршрут ' + (r ? r.line : '') + (x.caption ? ' · ' + x.caption : '');
+      const im = document.createElement('img');
+      im.loading = 'lazy';
+      im.alt = '';
+      im.src = schUrl(x.path);
+      const tag = document.createElement('span');
+      tag.className = 'sch-tag';
+      tag.textContent = r ? r.line : '';
+      b.append(im, tag);
+      b.addEventListener('click', () => openSchemeViewer(schUrl(x.path), 'Маршрут ' + (r ? r.line : '') + (x.caption ? ' · ' + x.caption : '')));
+      box.appendChild(b);
+    });
+    card.append(head, box);
+    nets.push(card);
+  }
   $('rnList').replaceChildren(...nets);
   $('rnEmpty').textContent = cityRoutes.length ? 'Нічого не знайдено' : 'Маршрутів поки немає';
   $('rnEmpty').classList.toggle('hidden', nets.length > 0);
 }
 
+let cityRouteSchemes = [];
 async function loadCityRoutes() {
   const id = currentId;
   if (!id) {
@@ -7461,6 +7504,9 @@ async function loadCityRoutes() {
   const { data, error } = await db.from('routes').select('*').eq('city_id', id);
   if (id !== currentId) return;
   cityRoutes = error ? [] : data || [];
+  const sr = await db.from('route_schemes').select('id, route_id, path, caption').eq('city_id', id).order('created_at');
+  if (id !== currentId) return;
+  cityRouteSchemes = sr.error ? [] : sr.data || [];
   renderCityRoutes();
 }
 
@@ -11280,6 +11326,7 @@ $('logout').addEventListener('click', async () => {
 /* ======================= НОВИНИ ======================= */
 const NEWS_SEEN = 'newsSeen';
 let newsRows = [];
+let newsErr = '';
 let newsEditing = null;      // null | 'new' | id
 let newsImg = null;          // { path } існуюча, { blob } нова, або null
 let newsImgRemoved = false;
@@ -11307,9 +11354,9 @@ function nwLinkify(text) {
 
 async function loadNews() {
   const { data, error } = await db.from('news').select('*').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(100);
-  if (error) return false;       // SQL ще не запущено: розділ не показуємо
-  newsRows = data || [];
-  return true;
+  newsErr = error ? error.message : '';
+  newsRows = error ? [] : data || [];
+  return !error;
 }
 
 function updateNewsDot() {
@@ -11364,7 +11411,9 @@ function drawNews() {
   if (!cards.length) {
     const p = document.createElement('p');
     p.className = 'cv-empty';
-    p.textContent = 'Новин поки немає';
+    p.textContent = newsErr
+      ? 'Новини не завантажились: ' + newsErr + (isStaff() ? ' — запустіть news.sql у Supabase (SQL Editor).' : '')
+      : 'Новин поки немає';
     cards.push(p);
   }
   $('newsList').replaceChildren(...cards);
@@ -11492,10 +11541,9 @@ $('nwDelete').addEventListener('click', async () => {
 
 (async () => {
   try {
-    if (await loadNews()) {
-      $('openNews').classList.remove('hidden');
-      updateNewsDot();
-    }
+    await loadNews();
+    $('openNews').classList.remove('hidden');
+    updateNewsDot();
   } catch (e) {}
 })();
 </script>
