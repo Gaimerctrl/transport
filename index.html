@@ -2249,6 +2249,18 @@ button {
 .rc-top { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; padding: 16px 24px; background: #262626; }
 .rc small { display: block; margin-bottom: 3px; font-size: 12px; color: #9a9aa0; }
 .rc-top b { font-weight: 600; }
+.rc-schemes { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
+.rc-sch { position: relative; width: 110px; height: 76px; border-radius: 8px; overflow: hidden; border: 1px solid #3a3a40; background: #222; cursor: zoom-in; padding: 0; }
+.rc-sch img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rc-sch .x { position: absolute; top: 2px; right: 2px; border: 0; border-radius: 50%; width: 20px; height: 20px; line-height: 20px; font-size: 12px; background: rgba(0,0,0,.7); color: #fff; cursor: pointer; padding: 0; }
+.rc-scheme-add { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+#rcSchemeMsg { font-size: 12px; color: #ff8d8d; }
+.sch-ov { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
+.sch-ov img { max-width: 100%; max-height: calc(100% - 40px); object-fit: contain; }
+.sch-ov span { color: #ddd; margin-top: 8px; font-size: 13px; }
+.warn-chip { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; background: rgba(255, 190, 40, .2); border: 1px solid #e6a600; color: #e6a600; }
+.warn-line { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-top: 3px; opacity: .9; }
+.warn-line button { border: 0; background: transparent; color: #ff8d8d; cursor: pointer; font-size: 12px; text-decoration: underline; padding: 0; }
 .rc-body { display: flex; flex-direction: column; gap: 14px; padding: 18px 24px; }
 .rc-body b { font-size: 20px; }
 .rc-row { display: flex; flex-wrap: wrap; gap: 14px 40px; }
@@ -3567,6 +3579,12 @@ input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
             <div><small id="rcPerLbl">Період експлуатації</small><span id="rcPeriod"></span></div>
           </div>
           <div id="rcNoteBox"><small>Примітка</small><span id="rcNote"></span></div>
+          <div id="rcSchemesBox" class="hidden">
+            <small>Схеми маршруту</small>
+            <div id="rcSchemes" class="rc-schemes"></div>
+            <div class="rc-scheme-add"><button class="btn light hidden" id="rcSchemeAdd" type="button">＋ Додати схему</button><span id="rcSchemeMsg"></span></div>
+            <input type="file" id="rcSchemeFile" accept="image/jpeg,image/png,image/webp" hidden>
+          </div>
         </div>
       </div>
       <div class="city-foot">
@@ -5779,7 +5797,107 @@ function openRouteInfo(r) {
   $('rcNoteBox').classList.toggle('hidden', !r.note);
   $('rcEdit').classList.toggle('hidden', !canEditEnt() || !curEnt);
   openModal('routeInfo');
+  loadRouteSchemes(r);
 }
+
+/* ---------- схеми маршрутів ---------- */
+const schUrl = p => db.storage.from('schemes').getPublicUrl(p).data.publicUrl;
+
+function openSchemeViewer(url, caption) {
+  const ov = document.createElement('div');
+  ov.className = 'sch-ov';
+  const im = document.createElement('img');
+  im.src = url;
+  im.alt = '';
+  const cap = document.createElement('span');
+  cap.textContent = (caption ? caption + ' · ' : '') + 'клік або Esc — закрити';
+  ov.append(im, cap);
+  const close = () => { ov.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  ov.addEventListener('click', close);
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(ov);
+}
+
+async function loadRouteSchemes(r) {
+  const box = $('rcSchemesBox');
+  $('rcSchemeMsg').textContent = '';
+  const can = canEditEnt() && !!curEnt;
+  const { data, error } = await db.from('route_schemes').select('*').eq('route_id', r.id).order('created_at');
+  if (curRoute !== r) return;
+  if (error) { box.classList.add('hidden'); return; }   // SQL ще не запущено
+  const list = data || [];
+  $('rcSchemeAdd').classList.toggle('hidden', !can || list.length >= 6);
+  box.classList.toggle('hidden', !list.length && !can);
+  $('rcSchemes').replaceChildren(...list.map(x => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'rc-sch';
+    b.title = x.caption || 'Схема маршруту';
+    const im = document.createElement('img');
+    im.loading = 'lazy';
+    im.alt = 'Схема';
+    im.src = schUrl(x.path);
+    b.appendChild(im);
+    b.addEventListener('click', () => openSchemeViewer(schUrl(x.path), x.caption));
+    if (can) {
+      const d = document.createElement('button');
+      d.type = 'button';
+      d.className = 'x';
+      d.textContent = '✕';
+      d.title = 'Видалити схему';
+      d.addEventListener('click', async e => {
+        e.stopPropagation();
+        if (!confirm('Видалити цю схему?')) return;
+        const res = await db.from('route_schemes').delete().eq('id', x.id);
+        if (res.error) { $('rcSchemeMsg').textContent = res.error.message; return; }
+        await db.storage.from('schemes').remove([x.path]);
+        loadRouteSchemes(r);
+      });
+      b.appendChild(d);
+    }
+    return b;
+  }));
+}
+
+async function schemeBlob(file) {
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  const k = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(bmp.width * k);
+  cv.height = Math.round(bmp.height * k);
+  const cx = cv.getContext('2d');
+  cx.fillStyle = '#fff';
+  cx.fillRect(0, 0, cv.width, cv.height);
+  cx.drawImage(bmp, 0, 0, cv.width, cv.height);
+  return await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.88));
+}
+
+$('rcSchemeAdd').addEventListener('click', () => $('rcSchemeFile').click());
+$('rcSchemeFile').addEventListener('change', async e => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  const r = curRoute;
+  if (!f || !r || !me.uid) return;
+  const msg = $('rcSchemeMsg');
+  msg.style.color = '';
+  msg.textContent = 'Завантаження…';
+  try {
+    const blob = await schemeBlob(f);
+    const path = r.city_id + '/' + r.id + '_' + Date.now() + '.jpg';
+    const up = await db.storage.from('schemes').upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+    if (up.error) throw up.error;
+    const ins = await db.from('route_schemes').insert({ route_id: r.id, city_id: r.city_id, owner_id: me.uid, path });
+    if (ins.error) {
+      await db.storage.from('schemes').remove([path]);
+      throw ins.error;
+    }
+    msg.textContent = '';
+    loadRouteSchemes(r);
+  } catch (err) {
+    msg.textContent = 'Помилка: ' + (err.message || err);
+  }
+});
 
 function resetRtDelete() {
   clearTimeout(rtDelTimer);
@@ -6584,10 +6702,17 @@ document.querySelectorAll('.staff-tab').forEach(t => {
 });
 
 let accounts = [];
+let warnsByUser = {};
+let warnsOk = false;
+const WARN_LIMIT = 3;
 
 async function loadAccounts() {
   const { data, error } = await db.from('profiles').select('id, username, role, banned, ban_reason, created_at').order('created_at', { ascending: false });
   accounts = error ? [] : data || [];
+  warnsByUser = {};
+  const wr = await db.from('user_warns').select('id, user_id, reason, issued_by_name, created_at').eq('revoked', false).order('created_at');
+  warnsOk = !wr.error;
+  (wr.data || []).forEach(w => { (warnsByUser[w.user_id] = warnsByUser[w.user_id] || []).push(w); });
   setMsg($('accMsg'), error ? error.message : '');
   drawAccounts();
 }
@@ -6604,6 +6729,22 @@ async function setBan(a, ban, reason) {
   await logAction(ban ? 'ban' : 'unban', a.username, reason);
   await loadAccounts();
   return '';
+}
+
+async function giveWarn(a, reason) {
+  const { data, error } = await db.rpc('give_warn', { target: a.id, warn_reason: reason });
+  if (error) return error.message;
+  await loadAccounts();
+  if (data && data.banned) setMsg($('accMsg'), 'Варн ' + data.count + '/' + data.limit + ' — акаунт «' + a.username + '» заблоковано автоматично.');
+  else setMsg($('accMsg'), 'Варн видано: ' + (data ? data.count + '/' + data.limit : ''));
+  return '';
+}
+
+async function revokeWarn(a, w) {
+  if (!confirm('Зняти варн «' + w.reason + '»?')) return;
+  const { error } = await db.rpc('revoke_warn', { warn_id: w.id });
+  if (error) { setMsg($('accMsg'), error.message); return; }
+  await loadAccounts();
 }
 
 async function deleteAccount(a, reason) {
@@ -6657,7 +6798,29 @@ function drawAccounts() {
         t.appendChild(tg);
       }
       if (a.banned) t.append(' · ЗАБАНЕНО');
+      const ws = warnsByUser[a.id] || [];
+      if (warnsOk && ws.length) {
+        const wc = document.createElement('span');
+        wc.className = 'warn-chip';
+        wc.textContent = '⚠ ' + ws.length + '/' + WARN_LIMIT;
+        t.appendChild(wc);
+      }
       info.appendChild(t);
+      if (warnsOk) ws.forEach(w => {
+        const wl = document.createElement('div');
+        wl.className = 'warn-line';
+        const tx = document.createElement('span');
+        tx.textContent = '⚠ ' + w.reason + ' — ' + (w.issued_by_name || '?') + ', ' + new Date(w.created_at).toLocaleDateString('uk-UA');
+        wl.appendChild(tx);
+        if (canBan(a)) {
+          const rv = document.createElement('button');
+          rv.type = 'button';
+          rv.textContent = 'зняти';
+          rv.addEventListener('click', () => revokeWarn(a, w));
+          wl.appendChild(rv);
+        }
+        info.appendChild(wl);
+      });
       if (a.banned && a.ban_reason) {
         const r = document.createElement('p');
         r.textContent = 'Причина: ' + a.ban_reason;
@@ -6678,6 +6841,14 @@ function drawAccounts() {
           openList('Ранг: ' + (a.username || ''), opts, a.role || 'user', it => setRole(a, it.key), 'photoUp');
         });
         d.appendChild(rb);
+      }
+      if (warnsOk && canBan(a)) {
+        const wb = document.createElement('button');
+        wb.type = 'button';
+        wb.className = 'btn';
+        wb.textContent = '⚠ Варн';
+        wb.addEventListener('click', () => askReason('Причина варну: ' + (a.username || ''), reason => giveWarn(a, reason)));
+        d.appendChild(wb);
       }
       if (canBan(a)) {
         const btn = document.createElement('button');
@@ -7320,7 +7491,7 @@ let phDrag = null;
 let pvCur = null;
 let pvTimer = null;
 
-Object.assign(logLabels, { photo_approve: 'прийняв фото', photo_reject: 'відхилив фото', delete_account: 'видалив акаунт', set_role: 'змінив ранг акаунта', comment_delete: 'видалив коментар' });
+Object.assign(logLabels, { photo_approve: 'прийняв фото', photo_reject: 'відхилив фото', delete_account: 'видалив акаунт', set_role: 'змінив ранг акаунта', comment_delete: 'видалив коментар', warn: 'видав варн', unwarn: 'зняв варн', 'warn+autoban': 'видав варн (автобан)' });
 PREFIX.push(['видалив акаунт', 'удалил аккаунт', 'deleted an account'], ['змінив ранг акаунта', 'изменил ранг аккаунта', 'changed account rank'], ['прийняв фото', 'принял фото', 'approved a photo'], ['відхилив фото', 'отклонил фото', 'rejected a photo']);
 DICT['НОВЕ'] = { ru: 'НОВОЕ', en: 'NEW' };
 DICT['Місце зйомки'] = { ru: 'Место съёмки', en: 'Shooting location' };
