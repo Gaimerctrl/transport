@@ -2251,6 +2251,14 @@ button {
 .rc-top b { font-weight: 600; }
 #newsView { padding: 20px 22px; box-sizing: border-box; }
 #newsView h2 { margin-top: 0; }
+.pf-warns { margin: 10px 0; padding: 12px 14px; border-radius: 12px; border: 2px solid #e6a600; background: rgba(230, 166, 0, .12); }
+.pf-warns.danger { border-color: #d62828; background: rgba(214, 40, 40, .1); }
+.pf-warns h4 { margin: 0 0 6px; font-size: 15px; }
+.pf-warns .pw-item { font-size: 13px; margin-top: 4px; }
+.pf-warns .pw-item small { opacity: .65; }
+.hn-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.hn-head h2 { margin: 0; }
+#homeNews { padding: 18px 20px; }
 .news-list { display: flex; flex-direction: column; gap: 14px; margin: 12px 0; }
 .nw-card { border: 1px solid rgba(128,128,128,.35); border-radius: 12px; overflow: hidden; background: rgba(128,128,128,.07); }
 .nw-card.pin { border-color: #e6a600; }
@@ -2918,6 +2926,11 @@ input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
   </div>
 </div>
 
+<section id="homeNews" class="panel hidden">
+  <div class="hn-head"><h2>📰 Новини</h2><button class="btn light" id="homeNewsAll" type="button">Усі новини</button></div>
+  <div id="homeNewsList" class="news-list"></div>
+</section>
+
 <div id="cityView" class="panel hidden">
       <!-- <div class="cv-main-tabs">
         <button class="cv-main-tab active" data-main="city" type="button">Місто</button>
@@ -3179,6 +3192,7 @@ input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
       </div>
     </div>
     <p id="pfBio" class="pf-bio hidden"></p>
+    <div id="pfWarns" class="pf-warns hidden"></div>
     <div id="pfPoints" class="pf-points hidden"></div>
     <div id="pfStats" class="pf-stats"></div>
     <h3 class="cv-about-title">Досягнення</h3>
@@ -9501,6 +9515,34 @@ function renderPfGrid() {
   $('pfEmpty').classList.toggle('hidden', list.length > 0);
 }
 
+async function loadProfileWarns(uid, own) {
+  const box = $('pfWarns');
+  box.classList.add('hidden');
+  if (!own && !isStaff()) return;                       // бачить сам користувач і адміністрація
+  const { data, error } = await db.from('user_warns').select('reason, issued_by_name, created_at').eq('user_id', uid).eq('revoked', false).order('created_at');
+  if (error || !data || !data.length || $('profileView').classList.contains('hidden')) return;
+  const lim = 3;
+  const h = document.createElement('h4');
+  h.textContent = '⚠ ' + (own ? 'У вас ' : 'Активні ') + 'попередження: ' + data.length + '/' + lim;
+  const note = document.createElement('div');
+  note.className = 'pw-item';
+  note.textContent = own
+    ? 'Після ' + lim + ' попереджень акаунт буде заблоковано. Дотримуйтесь правил сайту.'
+    : 'Ліміт ' + lim + ': після нього акаунт блокується автоматично.';
+  const items = data.map(w => {
+    const d = document.createElement('div');
+    d.className = 'pw-item';
+    d.append('• ' + w.reason + ' ');
+    const sm = document.createElement('small');
+    sm.textContent = '(' + new Date(w.created_at).toLocaleDateString('uk-UA') + (w.issued_by_name && !own ? ', ' + w.issued_by_name : '') + ')';
+    d.appendChild(sm);
+    return d;
+  });
+  box.replaceChildren(h, ...items, note);
+  box.classList.toggle('danger', data.length >= lim - 1);
+  box.classList.remove('hidden');
+}
+
 async function openProfile(uid) {
   if (!uid) return;
   showPage('profileView', '#user=' + uid);
@@ -9519,6 +9561,7 @@ async function openProfile(uid) {
   $('pfEmpty').classList.add('hidden');
   $('pfCitiesEmpty').classList.add('hidden');
   $('pfSettings').classList.add('hidden');
+  $('pfWarns').classList.add('hidden');
   $('pfFollow').classList.add('hidden');
   $('pfFavBox').classList.add('hidden');
   $('pfFollowBox').classList.add('hidden');
@@ -9551,6 +9594,7 @@ async function openProfile(uid) {
     bd.classList.add('hidden');
   }
   loadPointsCard(uid);
+  loadProfileWarns(uid, own);
   const days = (Date.now() - new Date(p.created_at).getTime()) / 86400000;
   $('pfMeta').replaceChildren(mk('span', 'На сайті з'), ' ', mk('b', new Date(p.created_at).toLocaleDateString('uk-UA')));
   if (p.bio) {
@@ -11364,11 +11408,7 @@ function updateNewsDot() {
   $('newsDot').classList.toggle('hidden', !latest || latest <= nwSeen());
 }
 
-function drawNews() {
-  const seen = nwSeen();
-  const staff = isStaff();
-  $('newsAdd').classList.toggle('hidden', !staff);
-  const cards = newsRows.map(n => {
+function nwCard(n, seen, staff) {
     const c = document.createElement('div');
     c.className = 'nw-card' + (n.pinned ? ' pin' : '');
     if (n.image_path) {
@@ -11402,12 +11442,18 @@ function drawNews() {
       e.type = 'button';
       e.className = 'btn light nw-edit';
       e.textContent = '✎ Редагувати';
-      e.addEventListener('click', () => openNewsForm(n));
+      e.addEventListener('click', () => { if (!$('overlay').classList.contains('open')) { showNewsList(); openModal('news'); } openNewsForm(n); });
       b.appendChild(e);
     }
     c.appendChild(b);
     return c;
-  });
+}
+
+function drawNews() {
+  const seen = nwSeen();
+  const staff = isStaff();
+  $('newsAdd').classList.toggle('hidden', !staff);
+  const cards = newsRows.map(n => nwCard(n, seen, staff));
   if (!cards.length) {
     const p = document.createElement('p');
     p.className = 'cv-empty';
@@ -11539,9 +11585,29 @@ $('nwDelete').addEventListener('click', async () => {
   showNewsList();
 });
 
+
+/* ---------- новини на головній ---------- */
+function drawHomeNews() {
+  const box = $('homeNews');
+  const mainViews = ['cityView', 'entView', ...PAGES];
+  const isHome = mainViews.every(id => !$(id) || $(id).classList.contains('hidden'));
+  const show = isHome && !newsErr && newsRows.length > 0;
+  box.classList.toggle('hidden', !show);
+  if (!show) return;
+  const seen = nwSeen();
+  const staff = isStaff();
+  $('homeNewsList').replaceChildren(...newsRows.slice(0, 5).map(n => nwCard(n, seen, staff)));
+  $('homeNewsAll').classList.toggle('hidden', newsRows.length <= 5);
+}
+$('homeNewsAll').addEventListener('click', openNews);
+let homeNewsT = null;
+new MutationObserver(() => { clearTimeout(homeNewsT); homeNewsT = setTimeout(drawHomeNews, 60); })
+  .observe(document.querySelector('main.layout'), { attributes: true, attributeFilter: ['class'], subtree: true });
+
 (async () => {
   try {
     await loadNews();
+    drawHomeNews();
     $('openNews').classList.remove('hidden');
     updateNewsDot();
   } catch (e) {}
