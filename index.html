@@ -2273,6 +2273,7 @@ nav .user-menu .btn .nav-lbl { display: inline !important; margin-left: 0; }
 .user-menu .btn.hidden { display: none !important; }
 #openRequests.in-menu::before { content: '🛡️'; }
 #logout.in-menu::before { content: '🚪'; }
+.ach.given { outline: 2px solid #e6a600; outline-offset: -2px; }
 .hn-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .hn-head h2 { margin: 0; }
 #homeNews { padding: 18px 20px; }
@@ -7613,7 +7614,7 @@ let phDrag = null;
 let pvCur = null;
 let pvTimer = null;
 
-Object.assign(logLabels, { photo_approve: 'прийняв фото', photo_reject: 'відхилив фото', delete_account: 'видалив акаунт', set_role: 'змінив ранг акаунта', comment_delete: 'видалив коментар', warn: 'видав варн', unwarn: 'зняв варн', 'warn+autoban': 'видав варн (автобан)' });
+Object.assign(logLabels, { photo_approve: 'прийняв фото', photo_reject: 'відхилив фото', delete_account: 'видалив акаунт', set_role: 'змінив ранг акаунта', comment_delete: 'видалив коментар', warn: 'видав варн', unwarn: 'зняв варн', 'warn+autoban': 'видав варн (автобан)', badge_grant: 'видав досягнення', badge_revoke: 'забрав досягнення' });
 PREFIX.push(['видалив акаунт', 'удалил аккаунт', 'deleted an account'], ['змінив ранг акаунта', 'изменил ранг аккаунта', 'changed account rank'], ['прийняв фото', 'принял фото', 'approved a photo'], ['відхилив фото', 'отклонил фото', 'rejected a photo']);
 DICT['НОВЕ'] = { ru: 'НОВОЕ', en: 'NEW' };
 DICT['Місце зйомки'] = { ru: 'Место съёмки', en: 'Shooting location' };
@@ -9676,7 +9677,16 @@ async function openProfile(uid) {
     d.append(mk('b', val), mk('span', label));
     return d;
   }));
-  $('pfAch').replaceChildren(...ACH.map(a => {
+  const given = await db.from('user_badges').select('icon, title, description, granted_name').eq('user_id', uid).order('created_at');
+  if ($('profileView').classList.contains('hidden')) return;
+  const givenEls = (given.error ? [] : given.data || []).map(g => {
+    const el = document.createElement('span');
+    el.className = 'ach on given';
+    el.title = (g.description ? g.description + ' · ' : '') + 'видано адміністрацією';
+    el.append(g.icon || '🏅', ' ', mk('span', g.title));
+    return el;
+  });
+  $('pfAch').replaceChildren(...givenEls, ...ACH.map(a => {
     const el = document.createElement('span');
     el.className = 'ach ' + (a.ok(st) ? 'on' : 'off');
     el.title = a.d;
