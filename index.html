@@ -2256,6 +2256,23 @@ button {
 .pf-warns h4 { margin: 0 0 6px; font-size: 15px; }
 .pf-warns .pw-item { font-size: 13px; margin-top: 4px; }
 .pf-warns .pw-item small { opacity: .65; }
+
+/* ---------- меню користувача (випадайка біля профілю) ---------- */
+#user { position: relative; }
+nav .profile { cursor: pointer; user-select: none; }
+.pf-chev { font-size: 18px; line-height: 1; margin-left: 2px; transition: transform .2s ease; color: #222; }
+html[data-theme="dark"] .pf-chev { color: #e8e8e8; }
+nav .profile.open .pf-chev { transform: rotate(180deg); }
+.user-menu { position: absolute; right: 0; top: calc(100% + 14px); min-width: 250px; z-index: 300; padding: 10px; border-radius: 22px; background: #ffffff; box-shadow: 0 12px 40px rgba(0, 0, 0, .28); display: flex; flex-direction: column; gap: 2px; }
+html[data-theme="dark"] .user-menu { background: #2a2a2a; }
+.user-menu.hidden { display: none; }
+nav .user-menu .btn { display: flex !important; align-items: center; gap: 14px; width: 100%; height: auto !important; padding: 13px 16px !important; font-size: 16px !important; text-align: left; justify-content: flex-start; border-radius: 12px; background: transparent !important; box-shadow: none !important; color: inherit; }
+nav .user-menu .btn:hover { background: rgba(128, 128, 128, .18) !important; }
+nav .user-menu .btn .nav-lbl { display: inline !important; margin-left: 0; }
+.user-menu .um-sep { height: 1px; margin: 6px 14px; background: rgba(128, 128, 128, .35); }
+.user-menu .btn.hidden { display: none !important; }
+#openRequests.in-menu::before { content: '🛡️'; }
+#logout.in-menu::before { content: '🚪'; }
 .hn-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .hn-head h2 { margin: 0; }
 #homeNews { padding: 18px 20px; }
@@ -2878,7 +2895,9 @@ input:-webkit-autofill { animation-name: afStart; animation-duration: 1ms; }
       </label>
       <span id="navName"></span>
       <span id="navBadge" class="badge hidden"></span>
+      <span class="pf-chev" id="navChev" aria-hidden="true">⌄</span>
     </div>
+    <div id="userMenu" class="user-menu hidden" role="menu"></div>
     <button class="btn" id="logout" type="button">Вийти</button>
   </div>
 </nav>
@@ -11611,6 +11630,48 @@ new MutationObserver(() => { clearTimeout(homeNewsT); homeNewsT = setTimeout(dra
     $('openNews').classList.remove('hidden');
     updateNewsDot();
   } catch (e) {}
+})();
+
+/* ======================= МЕНЮ КОРИСТУВАЧА ======================= */
+(() => {
+  const menu = $('userMenu'), prof = document.querySelector('nav .profile'), userBox = $('user');
+  const ids = ['openPhotoUp', 'openMyNav', 'openImport', 'openRequests', 'openSettings', 'logout'];
+  const els = Object.fromEntries(ids.map(i => [i, $(i)]));
+  const holders = {};
+  ids.forEach(i => { holders[i] = document.createComment(i); els[i].parentNode.insertBefore(holders[i], els[i]); });
+  if (!els.openImport.querySelector('.nav-lbl')) els.openImport.innerHTML = '📂<span class="nav-lbl">database</span>';
+  if (!els.openSettings.querySelector('.nav-lbl')) {
+    const l = document.createElement('span'); l.className = 'nav-lbl'; l.textContent = 'Налаштування'; els.openSettings.appendChild(l);
+  }
+  const avBtn = document.createElement('button');
+  avBtn.type = 'button'; avBtn.className = 'btn'; avBtn.id = 'menuAvatar';
+  avBtn.innerHTML = '🖼️<span class="nav-lbl">Змінити аватар</span>';
+  avBtn.addEventListener('click', () => $('avatarChange').click());
+  const sep = document.createElement('div'); sep.className = 'um-sep';
+  let inMenu = false;
+
+  function toMenu() {
+    if (inMenu) return; inMenu = true;
+    menu.replaceChildren(els.openPhotoUp, els.openMyNav, els.openImport, els.openRequests, avBtn, els.openSettings, sep, els.logout);
+    els.openRequests.classList.add('in-menu'); els.logout.classList.add('in-menu');
+  }
+  function toNav() {
+    if (!inMenu) return; inMenu = false;
+    close();
+    ids.forEach(i => { holders[i].parentNode.insertBefore(els[i], holders[i]); });
+    els.openRequests.classList.remove('in-menu'); els.logout.classList.remove('in-menu');
+    menu.replaceChildren();
+  }
+  const sync = () => (userBox.classList.contains('hidden') ? toNav() : toMenu());
+  function close() { menu.classList.add('hidden'); prof.classList.remove('open'); }
+  function toggle() { const open = menu.classList.contains('hidden'); menu.classList.toggle('hidden', !open); prof.classList.toggle('open', open); }
+
+  prof.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); toggle(); }, true);   // і клік по аватарці відкриває меню
+  menu.addEventListener('click', e => { if (e.target.closest('.btn')) setTimeout(close, 0); });
+  document.addEventListener('click', e => { if (!menu.contains(e.target) && !prof.contains(e.target)) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  new MutationObserver(sync).observe(userBox, { attributes: true, attributeFilter: ['class'] });
+  sync();
 })();
 </script>
 
