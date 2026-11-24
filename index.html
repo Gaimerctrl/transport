@@ -2713,7 +2713,8 @@ button {
 /* ---------- меню користувача (випадайка біля профілю) ---------- */
 #user { position: relative; }
 nav .profile { cursor: pointer; user-select: none; }
-.pf-chev { font-size: 18px; line-height: 1; margin-left: 2px; transition: transform .2s ease; color: #222; }
+.pf-chev { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: none; margin-left: 2px; transition: transform .2s ease; color: #222; }
+.pf-chev svg { display: block; }
 html[data-theme="dark"] .pf-chev { color: #e8e8e8; }
 nav .profile.open .pf-chev { transform: rotate(180deg); }
 .user-menu { position: absolute; right: 0; top: calc(100% + 14px); min-width: 250px; z-index: 300; padding: 10px; border-radius: 22px; background: #ffffff; box-shadow: 0 12px 40px rgba(0, 0, 0, .28); display: flex; flex-direction: column; gap: 2px; }
@@ -3362,7 +3363,7 @@ body.maintenance-active{overflow:hidden}
       </label>
       <span id="navName"></span>
       <span id="navBadge" class="badge hidden"></span>
-      <span class="pf-chev" id="navChev" aria-hidden="true">⌄</span>
+      <span class="pf-chev" id="navChev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
     </div>
     <div id="userMenu" class="user-menu hidden" role="menu"></div>
     <button class="btn" id="logout" type="button">Вийти</button>
